@@ -6,7 +6,7 @@ GEN_DIR := gen
 GO_MODULE := github.com/homindolenern/goapps-costing-v1
 GRPC_PORT := 9090
 HTTP_PORT := 8080
-POSTGRES_URL := postgres://postgres:postgres@localhost:5432/costing_db?sslmode=disable
+POSTGRES_URL := postgres://postgres:postgres@localhost:5433/costing_db?sslmode=disable
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
