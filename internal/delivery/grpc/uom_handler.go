@@ -20,6 +20,7 @@ type UOMHandler struct {
 	deleteHandler *appuom.DeleteHandler
 	getHandler    *appuom.GetHandler
 	listHandler   *appuom.ListHandler
+	validator     *ValidationHelper
 }
 
 // NewUOMHandler creates a new UOM handler
@@ -29,6 +30,7 @@ func NewUOMHandler(
 	deleteHandler *appuom.DeleteHandler,
 	getHandler *appuom.GetHandler,
 	listHandler *appuom.ListHandler,
+	validator *ValidationHelper,
 ) *UOMHandler {
 	return &UOMHandler{
 		createHandler: createHandler,
@@ -36,11 +38,17 @@ func NewUOMHandler(
 		deleteHandler: deleteHandler,
 		getHandler:    getHandler,
 		listHandler:   listHandler,
+		validator:     validator,
 	}
 }
 
 // CreateUOM creates a new Unit of Measure
 func (h *UOMHandler) CreateUOM(ctx context.Context, req *pb.CreateUOMRequest) (*pb.CreateUOMResponse, error) {
+	// Validate request
+	if validationResp := h.validator.Validate(ctx, req); validationResp != nil {
+		return &pb.CreateUOMResponse{Base: validationResp}, nil
+	}
+
 	cmd := appuom.CreateCommand{
 		UOMCode:   req.UomCode,
 		UOMName:   req.UomName,
@@ -122,6 +130,11 @@ func (h *UOMHandler) ListUOMs(ctx context.Context, req *pb.ListUOMsRequest) (*pb
 
 // UpdateUOM updates an existing Unit of Measure
 func (h *UOMHandler) UpdateUOM(ctx context.Context, req *pb.UpdateUOMRequest) (*pb.UpdateUOMResponse, error) {
+	// Validate request
+	if validationResp := h.validator.Validate(ctx, req); validationResp != nil {
+		return &pb.UpdateUOMResponse{Base: validationResp}, nil
+	}
+
 	cmd := appuom.UpdateCommand{
 		UOMCode:   req.UomCode,
 		UOMName:   req.UomName,

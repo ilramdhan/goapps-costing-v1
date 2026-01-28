@@ -17,6 +17,7 @@ type ParameterHandler struct {
 	deleteHandler *appparam.DeleteHandler
 	getHandler    *appparam.GetHandler
 	listHandler   *appparam.ListHandler
+	validator     *ValidationHelper
 }
 
 // NewParameterHandler creates a new Parameter handler
@@ -26,6 +27,7 @@ func NewParameterHandler(
 	deleteHandler *appparam.DeleteHandler,
 	getHandler *appparam.GetHandler,
 	listHandler *appparam.ListHandler,
+	validator *ValidationHelper,
 ) *ParameterHandler {
 	return &ParameterHandler{
 		createHandler: createHandler,
@@ -33,11 +35,17 @@ func NewParameterHandler(
 		deleteHandler: deleteHandler,
 		getHandler:    getHandler,
 		listHandler:   listHandler,
+		validator:     validator,
 	}
 }
 
 // CreateParameter creates a new Parameter
 func (h *ParameterHandler) CreateParameter(ctx context.Context, req *pb.CreateParameterRequest) (*pb.CreateParameterResponse, error) {
+	// Validate request
+	if validationResp := h.validator.Validate(ctx, req); validationResp != nil {
+		return &pb.CreateParameterResponse{Base: validationResp}, nil
+	}
+
 	cmd := appparam.CreateCommand{
 		ParameterCode: req.ParameterCode,
 		ParameterName: req.ParameterName,

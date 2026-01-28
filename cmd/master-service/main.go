@@ -122,6 +122,15 @@ func run(cfg *config.Config) error {
 	paramGetHandler := appparam.NewGetHandler(paramRepo)
 	paramListHandler := appparam.NewListHandler(paramRepo)
 
+	// Create protovalidate validator
+	validator, err := protovalidate.New()
+	if err != nil {
+		return fmt.Errorf("failed to create validator: %w", err)
+	}
+
+	// Create validation helper
+	validationHelper := grpcdelivery.NewValidationHelper(validator)
+
 	// Initialize gRPC handlers
 	uomHandler := grpcdelivery.NewUOMHandler(
 		uomCreateHandler,
@@ -129,6 +138,7 @@ func run(cfg *config.Config) error {
 		uomDeleteHandler,
 		uomGetHandler,
 		uomListHandler,
+		validationHelper,
 	)
 	paramHandler := grpcdelivery.NewParameterHandler(
 		paramCreateHandler,
@@ -136,6 +146,7 @@ func run(cfg *config.Config) error {
 		paramDeleteHandler,
 		paramGetHandler,
 		paramListHandler,
+		validationHelper,
 	)
 	healthHandler := grpcdelivery.NewHealthHandlerWithRedis(db, redisClient)
 
@@ -182,18 +193,12 @@ func runGRPCServer(
 		return fmt.Errorf("failed to listen on %s: %w", addr, err)
 	}
 
-	// Create protovalidate validator
-	validator, err := protovalidate.New()
-	if err != nil {
-		return fmt.Errorf("failed to create validator: %w", err)
-	}
-
 	// Create gRPC server with interceptors
+	// Note: Validation is now done in handlers to return proper BaseResponse format
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			interceptors.Recovery(),
 			interceptors.Logging(),
-			interceptors.Validation(validator),
 		),
 	)
 
