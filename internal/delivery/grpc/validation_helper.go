@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 
 	"buf.build/go/protovalidate"
 	"google.golang.org/protobuf/proto"
@@ -9,18 +10,18 @@ import (
 	pb "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1"
 )
 
-// ValidationHelper provides validation utilities for handlers
+// ValidationHelper provides validation utilities for handlers.
 type ValidationHelper struct {
 	validator protovalidate.Validator
 }
 
-// NewValidationHelper creates a new validation helper
+// NewValidationHelper creates a new validation helper.
 func NewValidationHelper(validator protovalidate.Validator) *ValidationHelper {
 	return &ValidationHelper{validator: validator}
 }
 
-// Validate validates a proto message and returns BaseResponse with validation errors if any
-func (h *ValidationHelper) Validate(ctx context.Context, msg proto.Message) *pb.BaseResponse {
+// Validate validates a proto message and returns BaseResponse with validation errors if any.
+func (h *ValidationHelper) Validate(_ context.Context, msg proto.Message) *pb.BaseResponse {
 	if h.validator == nil {
 		return nil // No validator, skip validation
 	}
@@ -41,14 +42,15 @@ func (h *ValidationHelper) Validate(ctx context.Context, msg proto.Message) *pb.
 	}
 }
 
-// parseValidationError parses protovalidate error into structured format
+// parseValidationError parses protovalidate error into structured format.
 func (h *ValidationHelper) parseValidationError(err error) []*pb.ValidationError {
 	if err == nil {
 		return nil
 	}
 
-	// Try to cast to ValidationError
-	if ve, ok := err.(*protovalidate.ValidationError); ok {
+	// Use errors.As for proper wrapped error handling
+	var ve *protovalidate.ValidationError
+	if errors.As(err, &ve) {
 		return h.parseViolations(ve)
 	}
 
@@ -58,9 +60,9 @@ func (h *ValidationHelper) parseValidationError(err error) []*pb.ValidationError
 	}
 }
 
-// parseViolations parses violations from ValidationError
+// parseViolations parses violations from ValidationError.
 func (h *ValidationHelper) parseViolations(ve *protovalidate.ValidationError) []*pb.ValidationError {
-	errors := make([]*pb.ValidationError, 0, len(ve.Violations))
+	validationErrors := make([]*pb.ValidationError, 0, len(ve.Violations))
 
 	for _, violation := range ve.Violations {
 		field := ""
@@ -81,18 +83,11 @@ func (h *ValidationHelper) parseViolations(ve *protovalidate.ValidationError) []
 			message = violation.String()
 		}
 
-		errors = append(errors, &pb.ValidationError{
+		validationErrors = append(validationErrors, &pb.ValidationError{
 			Field:   field,
 			Message: message,
 		})
 	}
 
-	return errors
+	return validationErrors
 }
-
-// ValidateAndRespond is a helper for handlers that returns a typed response
-// Example usage:
-//
-//	if resp := h.validator.ValidateAndRespond(ctx, req); resp != nil {
-//	    return &pb.CreateUOMResponse{Base: resp}, nil
-//	}

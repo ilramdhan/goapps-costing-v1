@@ -6,22 +6,22 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/domain/parameter"
 )
 
-// GetQuery represents the get Parameter query
+// GetQuery represents the get Parameter query.
 type GetQuery struct {
 	ParameterCode string
 }
 
-// GetHandler handles the GetParameter query
+// GetHandler handles the GetParameter query.
 type GetHandler struct {
 	repo parameter.Repository
 }
 
-// NewGetHandler creates a new get handler
+// NewGetHandler creates a new get handler.
 func NewGetHandler(repo parameter.Repository) *GetHandler {
 	return &GetHandler{repo: repo}
 }
 
-// Handle executes the get query
+// Handle executes the get query.
 func (h *GetHandler) Handle(ctx context.Context, query GetQuery) (*parameter.Parameter, error) {
 	code, err := parameter.NewParameterCode(query.ParameterCode)
 	if err != nil {
@@ -31,7 +31,7 @@ func (h *GetHandler) Handle(ctx context.Context, query GetQuery) (*parameter.Par
 	return h.repo.GetByCode(ctx, code)
 }
 
-// ListQuery represents the list Parameters query
+// ListQuery represents the list Parameters query.
 type ListQuery struct {
 	Category *string
 	IsActive *bool
@@ -39,23 +39,23 @@ type ListQuery struct {
 	PageSize int
 }
 
-// ListResult contains the list result with pagination
+// ListResult contains the list result with pagination.
 type ListResult struct {
 	Parameters []*parameter.Parameter
 	Total      int64
 }
 
-// ListHandler handles the ListParameters query
+// ListHandler handles the ListParameters query.
 type ListHandler struct {
 	repo parameter.Repository
 }
 
-// NewListHandler creates a new list handler
+// NewListHandler creates a new list handler.
 func NewListHandler(repo parameter.Repository) *ListHandler {
 	return &ListHandler{repo: repo}
 }
 
-// Handle executes the list query
+// Handle executes the list query.
 func (h *ListHandler) Handle(ctx context.Context, query ListQuery) (*ListResult, error) {
 	filter := parameter.ListFilter{
 		Page:     query.Page,

@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// TokenBucket implements a token bucket rate limiter
+// TokenBucket implements a token bucket rate limiter.
 type TokenBucket struct {
 	tokens     float64
 	maxTokens  float64
@@ -20,7 +20,7 @@ type TokenBucket struct {
 	mu         sync.Mutex
 }
 
-// NewTokenBucket creates a new token bucket
+// NewTokenBucket creates a new token bucket.
 func NewTokenBucket(maxTokens, refillRate float64) *TokenBucket {
 	return &TokenBucket{
 		tokens:     maxTokens,
@@ -30,14 +30,14 @@ func NewTokenBucket(maxTokens, refillRate float64) *TokenBucket {
 	}
 }
 
-// Allow checks if a request is allowed and consumes a token
+// Allow checks if a request is allowed and consumes a token.
 func (tb *TokenBucket) Allow() bool {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
 
 	now := time.Now()
 	elapsed := now.Sub(tb.lastRefill).Seconds()
-	tb.tokens = min(tb.maxTokens, tb.tokens+(elapsed*tb.refillRate))
+	tb.tokens = minFloat(tb.maxTokens, tb.tokens+(elapsed*tb.refillRate))
 	tb.lastRefill = now
 
 	if tb.tokens >= 1 {
@@ -47,7 +47,7 @@ func (tb *TokenBucket) Allow() bool {
 	return false
 }
 
-// RateLimiter manages per-client rate limiting
+// RateLimiter manages per-client rate limiting.
 type RateLimiter struct {
 	buckets    map[string]*TokenBucket
 	maxTokens  float64
@@ -55,9 +55,7 @@ type RateLimiter struct {
 	mu         sync.RWMutex
 }
 
-// NewRateLimiter creates a new rate limiter
-// maxTokens: maximum burst size
-// refillRate: tokens per second
+// NewRateLimiter creates a new rate limiter with maxTokens as burst size and refillRate as tokens per second.
 func NewRateLimiter(maxTokens, refillRate float64) *RateLimiter {
 	return &RateLimiter{
 		buckets:    make(map[string]*TokenBucket),
@@ -66,7 +64,7 @@ func NewRateLimiter(maxTokens, refillRate float64) *RateLimiter {
 	}
 }
 
-// Allow checks if a request from the given key is allowed
+// Allow checks if a request from the given key is allowed.
 func (rl *RateLimiter) Allow(key string) bool {
 	rl.mu.RLock()
 	bucket, exists := rl.buckets[key]
@@ -86,7 +84,7 @@ func (rl *RateLimiter) Allow(key string) bool {
 	return bucket.Allow()
 }
 
-// Cleanup removes old buckets that haven't been used
+// Cleanup removes old buckets that haven't been used.
 func (rl *RateLimiter) Cleanup(maxAge time.Duration) {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
@@ -101,7 +99,7 @@ func (rl *RateLimiter) Cleanup(maxAge time.Duration) {
 	}
 }
 
-// StartCleanup starts a background cleanup routine
+// StartCleanup starts a background cleanup routine.
 func (rl *RateLimiter) StartCleanup(ctx context.Context, interval, maxAge time.Duration) {
 	go func() {
 		ticker := time.NewTicker(interval)
@@ -118,7 +116,7 @@ func (rl *RateLimiter) StartCleanup(ctx context.Context, interval, maxAge time.D
 	}()
 }
 
-// UnaryInterceptor returns a gRPC unary interceptor for rate limiting
+// UnaryInterceptor returns a gRPC unary interceptor for rate limiting.
 func UnaryInterceptor(rl *RateLimiter) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
@@ -140,7 +138,8 @@ func UnaryInterceptor(rl *RateLimiter) grpc.UnaryServerInterceptor {
 	}
 }
 
-func min(a, b float64) float64 {
+// minFloat returns the smaller of two float64 values.
+func minFloat(a, b float64) float64 {
 	if a < b {
 		return a
 	}

@@ -24,7 +24,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Suppress "imported and not used" errors
+// Suppress "imported and not used" errors.
 var (
 	_ codes.Code
 	_ io.Reader
@@ -127,7 +127,7 @@ func RegisterHealthServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 	return nil
 }
 
-// RegisterHealthServiceHandlerFromEndpoint is same as RegisterHealthServiceHandler but
+// RegisterHealthServiceHandlerFromEndpoint is same as RegisterHealthServiceHandler but.
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterHealthServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.NewClient(endpoint, opts...)
@@ -157,7 +157,7 @@ func RegisterHealthServiceHandler(ctx context.Context, mux *runtime.ServeMux, co
 	return RegisterHealthServiceHandlerClient(ctx, mux, NewHealthServiceClient(conn))
 }
 
-// RegisterHealthServiceHandlerClient registers the http handlers for service HealthService
+// RegisterHealthServiceHandlerClient registers the http handlers for service HealthService.
 // to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "HealthServiceClient".
 // Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "HealthServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in

@@ -4,25 +4,25 @@ import (
 	"regexp"
 )
 
-// ParameterCode is a value object for parameter identifier
-type ParameterCode string
+// Code is a value object for parameter identifier.
+type Code string
 
 var parameterCodePattern = regexp.MustCompile(`^[A-Z][A-Z0-9_]{0,49}$`)
 
-// NewParameterCode creates a validated parameter code
-func NewParameterCode(code string) (ParameterCode, error) {
+// NewParameterCode creates a validated parameter code.
+func NewParameterCode(code string) (Code, error) {
 	if !parameterCodePattern.MatchString(code) {
 		return "", ErrInvalidCode
 	}
-	return ParameterCode(code), nil
+	return Code(code), nil
 }
 
-// String returns the string representation
-func (c ParameterCode) String() string {
+// String returns the string representation.
+func (c Code) String() string {
 	return string(c)
 }
 
-// Category represents the type/category of Parameter
+// Category represents the type/category of Parameter.
 type Category string
 
 const (
@@ -33,7 +33,7 @@ const (
 	CategoryProcess  Category = "PROCESS"
 )
 
-// NewCategory creates a validated category
+// NewCategory creates a validated category.
 func NewCategory(category string) (Category, error) {
 	switch Category(category) {
 	case CategoryMachine, CategoryMaterial, CategoryQuality, CategoryOutput, CategoryProcess:
@@ -43,12 +43,12 @@ func NewCategory(category string) (Category, error) {
 	}
 }
 
-// String returns the string representation
+// String returns the string representation.
 func (c Category) String() string {
 	return string(c)
 }
 
-// DataType represents the data type of parameter value
+// DataType represents the data type of parameter value.
 type DataType string
 
 const (
@@ -58,7 +58,7 @@ const (
 	DataTypeDropdown DataType = "DROPDOWN"
 )
 
-// NewDataType creates a validated data type
+// NewDataType creates a validated data type.
 func NewDataType(dataType string) (DataType, error) {
 	switch DataType(dataType) {
 	case DataTypeNumeric, DataTypeText, DataTypeBoolean, DataTypeDropdown:
@@ -68,7 +68,7 @@ func NewDataType(dataType string) (DataType, error) {
 	}
 }
 
-// String returns the string representation
+// String returns the string representation.
 func (d DataType) String() string {
 	return string(d)
 }

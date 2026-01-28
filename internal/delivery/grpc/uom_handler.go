@@ -4,15 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	pb "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1"
 	appuom "github.com/homindolenern/goapps-costing-v1/internal/application/uom"
 	"github.com/homindolenern/goapps-costing-v1/internal/domain/uom"
 )
 
-// UOMHandler implements the gRPC UOMService
+// UOMHandler implements the gRPC UOMService.
 type UOMHandler struct {
 	pb.UnimplementedUOMServiceServer
 	createHandler *appuom.CreateHandler
@@ -23,7 +20,7 @@ type UOMHandler struct {
 	validator     *ValidationHelper
 }
 
-// NewUOMHandler creates a new UOM handler
+// NewUOMHandler creates a new UOM handler.
 func NewUOMHandler(
 	createHandler *appuom.CreateHandler,
 	updateHandler *appuom.UpdateHandler,
@@ -42,7 +39,7 @@ func NewUOMHandler(
 	}
 }
 
-// CreateUOM creates a new Unit of Measure
+// CreateUOM creates a new Unit of Measure.
 func (h *UOMHandler) CreateUOM(ctx context.Context, req *pb.CreateUOMRequest) (*pb.CreateUOMResponse, error) {
 	// Validate request
 	if validationResp := h.validator.Validate(ctx, req); validationResp != nil {
@@ -70,7 +67,7 @@ func (h *UOMHandler) CreateUOM(ctx context.Context, req *pb.CreateUOMRequest) (*
 	}, nil
 }
 
-// GetUOM retrieves a Unit of Measure by code
+// GetUOM retrieves a Unit of Measure by code.
 func (h *UOMHandler) GetUOM(ctx context.Context, req *pb.GetUOMRequest) (*pb.GetUOMResponse, error) {
 	query := appuom.GetQuery{UOMCode: req.UomCode}
 
@@ -87,7 +84,7 @@ func (h *UOMHandler) GetUOM(ctx context.Context, req *pb.GetUOMRequest) (*pb.Get
 	}, nil
 }
 
-// ListUOMs retrieves a paginated list of Units of Measure
+// ListUOMs retrieves a paginated list of Units of Measure.
 func (h *UOMHandler) ListUOMs(ctx context.Context, req *pb.ListUOMsRequest) (*pb.ListUOMsResponse, error) {
 	query := appuom.ListQuery{
 		Page:     int(req.Page),
@@ -128,7 +125,7 @@ func (h *UOMHandler) ListUOMs(ctx context.Context, req *pb.ListUOMsRequest) (*pb
 	}, nil
 }
 
-// UpdateUOM updates an existing Unit of Measure
+// UpdateUOM updates an existing Unit of Measure.
 func (h *UOMHandler) UpdateUOM(ctx context.Context, req *pb.UpdateUOMRequest) (*pb.UpdateUOMResponse, error) {
 	// Validate request
 	if validationResp := h.validator.Validate(ctx, req); validationResp != nil {
@@ -156,7 +153,7 @@ func (h *UOMHandler) UpdateUOM(ctx context.Context, req *pb.UpdateUOMRequest) (*
 	}, nil
 }
 
-// DeleteUOM deletes a Unit of Measure by code
+// DeleteUOM deletes a Unit of Measure by code.
 func (h *UOMHandler) DeleteUOM(ctx context.Context, req *pb.DeleteUOMRequest) (*pb.DeleteUOMResponse, error) {
 	cmd := appuom.DeleteCommand{UOMCode: req.UomCode}
 
@@ -172,7 +169,7 @@ func (h *UOMHandler) DeleteUOM(ctx context.Context, req *pb.DeleteUOMRequest) (*
 	}, nil
 }
 
-// Helper functions
+// Helper functions.
 
 func pbCategoryToString(cat pb.UOMCategory) string {
 	switch cat {
@@ -184,9 +181,10 @@ func pbCategoryToString(cat pb.UOMCategory) string {
 		return "QUANTITY"
 	case pb.UOMCategory_UOM_CATEGORY_LENGTH:
 		return "LENGTH"
-	default:
+	case pb.UOMCategory_UOM_CATEGORY_UNSPECIFIED:
 		return ""
 	}
+	return ""
 }
 
 func stringToPbCategory(cat string) pb.UOMCategory {
@@ -256,20 +254,5 @@ func errorToBaseResponse(err error) *pb.BaseResponse {
 		StatusCode: statusCode,
 		IsSuccess:  false,
 		Message:    message,
-	}
-}
-
-func mapDomainErrorToGRPC(err error) error {
-	switch {
-	case errors.Is(err, uom.ErrNotFound):
-		return status.Error(codes.NotFound, err.Error())
-	case errors.Is(err, uom.ErrAlreadyExists):
-		return status.Error(codes.AlreadyExists, err.Error())
-	case errors.Is(err, uom.ErrInvalidUOMCode),
-		errors.Is(err, uom.ErrInvalidCategory),
-		errors.Is(err, uom.ErrEmptyName):
-		return status.Error(codes.InvalidArgument, err.Error())
-	default:
-		return status.Error(codes.Internal, "internal server error")
 	}
 }

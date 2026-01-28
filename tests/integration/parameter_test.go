@@ -53,12 +53,12 @@ func TestParameterDomain_NumericConstraints(t *testing.T) {
 	entity, _ := parameter.NewParameter(code, "Rotation Per Minute", category, dataType, "admin")
 
 	// Valid range
-	min := 100.0
-	max := 10000.0
-	err := entity.SetNumericConstraints(&min, &max)
+	minVal := 100.0
+	maxVal := 10000.0
+	err := entity.SetNumericConstraints(&minVal, &maxVal)
 	require.NoError(t, err)
-	assert.Equal(t, &min, entity.MinValue())
-	assert.Equal(t, &max, entity.MaxValue())
+	assert.Equal(t, &minVal, entity.MinValue())
+	assert.Equal(t, &maxVal, entity.MaxValue())
 
 	// Invalid range (min > max)
 	invalidMin := 500.0

@@ -13,7 +13,7 @@ import (
 	status "google.golang.org/grpc/status"
 )
 
-// This is a compile-time assertion to ensure that this generated file
+// This is a compile-time assertion to ensure that this generated file.
 // is compatible with the grpc package it is being compiled against.
 // Requires gRPC-Go v1.64.0 or later.
 const _ = grpc.SupportPackageIsVersion9
@@ -30,7 +30,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// UOMService provides CRUD operations for Unit of Measure
+// UOMService provides CRUD operations for Unit of Measure.
 type UOMServiceClient interface {
 	// CreateUOM creates a new Unit of Measure
 	CreateUOM(ctx context.Context, in *CreateUOMRequest, opts ...grpc.CallOption) (*CreateUOMResponse, error)
@@ -103,10 +103,10 @@ func (c *uOMServiceClient) DeleteUOM(ctx context.Context, in *DeleteUOMRequest, 
 }
 
 // UOMServiceServer is the server API for UOMService service.
-// All implementations must embed UnimplementedUOMServiceServer
+// All implementations must embed UnimplementedUOMServiceServer.
 // for forward compatibility.
 //
-// UOMService provides CRUD operations for Unit of Measure
+// UOMService provides CRUD operations for Unit of Measure.
 type UOMServiceServer interface {
 	// CreateUOM creates a new Unit of Measure
 	CreateUOM(context.Context, *CreateUOMRequest) (*CreateUOMResponse, error)
@@ -121,7 +121,7 @@ type UOMServiceServer interface {
 	mustEmbedUnimplementedUOMServiceServer()
 }
 
-// UnimplementedUOMServiceServer must be embedded to have
+// UnimplementedUOMServiceServer must be embedded to have.
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
@@ -147,7 +147,7 @@ func (UnimplementedUOMServiceServer) mustEmbedUnimplementedUOMServiceServer() {}
 func (UnimplementedUOMServiceServer) testEmbeddedByValue()                    {}
 
 // UnsafeUOMServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to UOMServiceServer will
+// Use of this interface is not recommended, as added methods to UOMServiceServer will.
 // result in compilation errors.
 type UnsafeUOMServiceServer interface {
 	mustEmbedUnimplementedUOMServiceServer()

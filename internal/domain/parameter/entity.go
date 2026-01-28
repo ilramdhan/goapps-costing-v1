@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Domain errors
+// Domain errors.
 var (
 	ErrNotFound          = errors.New("parameter not found")
 	ErrAlreadyExists     = errors.New("parameter already exists")
@@ -18,9 +18,9 @@ var (
 	ErrDropdownNoOptions = errors.New("dropdown type requires allowed_values")
 )
 
-// Parameter is the aggregate root for configuration parameters
+// Parameter is the aggregate root for configuration parameters.
 type Parameter struct {
-	code          ParameterCode
+	code          Code
 	name          string
 	category      Category
 	dataType      DataType
@@ -37,9 +37,9 @@ type Parameter struct {
 	updatedBy     *string
 }
 
-// NewParameter creates a new Parameter with validation
+// NewParameter creates a new Parameter with validation.
 func NewParameter(
-	code ParameterCode,
+	code Code,
 	name string,
 	category Category,
 	dataType DataType,
@@ -64,9 +64,9 @@ func NewParameter(
 	}, nil
 }
 
-// Reconstitute creates a Parameter from persistence (no validation)
+// Reconstitute creates a Parameter from persistence (no validation).
 func Reconstitute(
-	code ParameterCode,
+	code Code,
 	name string,
 	category Category,
 	dataType DataType,
@@ -101,8 +101,8 @@ func Reconstitute(
 	}
 }
 
-// Getters
-func (p *Parameter) Code() ParameterCode     { return p.code }
+// Getters.
+func (p *Parameter) Code() Code              { return p.code }
 func (p *Parameter) Name() string            { return p.name }
 func (p *Parameter) Category() Category      { return p.category }
 func (p *Parameter) DataType() DataType      { return p.dataType }
@@ -118,7 +118,7 @@ func (p *Parameter) CreatedBy() string       { return p.createdBy }
 func (p *Parameter) UpdatedAt() *time.Time   { return p.updatedAt }
 func (p *Parameter) UpdatedBy() *string      { return p.updatedBy }
 
-// SetNumericConstraints sets min/max values for numeric parameters
+// SetNumericConstraints sets min/max values for numeric parameters.
 func (p *Parameter) SetNumericConstraints(minVal, maxVal *float64) error {
 	if minVal != nil && maxVal != nil && *minVal > *maxVal {
 		return ErrMinGreaterThanMax
@@ -128,7 +128,7 @@ func (p *Parameter) SetNumericConstraints(minVal, maxVal *float64) error {
 	return nil
 }
 
-// SetAllowedValues sets dropdown options
+// SetAllowedValues sets dropdown options.
 func (p *Parameter) SetAllowedValues(values []string) error {
 	if p.dataType == DataTypeDropdown && len(values) == 0 {
 		return ErrDropdownNoOptions
@@ -137,32 +137,32 @@ func (p *Parameter) SetAllowedValues(values []string) error {
 	return nil
 }
 
-// SetUOM sets the unit of measure
+// SetUOM sets the unit of measure.
 func (p *Parameter) SetUOM(uom *string) {
 	p.uom = uom
 }
 
-// SetDescription sets the description
+// SetDescription sets the description.
 func (p *Parameter) SetDescription(desc *string) {
 	p.description = desc
 }
 
-// SetMandatory sets whether the parameter is mandatory
+// SetMandatory sets whether the parameter is mandatory.
 func (p *Parameter) SetMandatory(mandatory bool) {
 	p.isMandatory = mandatory
 }
 
-// Activate activates the parameter
+// Activate activates the parameter.
 func (p *Parameter) Activate() {
 	p.isActive = true
 }
 
-// Deactivate deactivates the parameter
+// Deactivate deactivates the parameter.
 func (p *Parameter) Deactivate() {
 	p.isActive = false
 }
 
-// Update updates the parameter
+// Update updates the parameter.
 func (p *Parameter) Update(
 	name string,
 	category Category,

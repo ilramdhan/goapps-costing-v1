@@ -13,7 +13,7 @@ import (
 	status "google.golang.org/grpc/status"
 )
 
-// This is a compile-time assertion to ensure that this generated file
+// This is a compile-time assertion to ensure that this generated file.
 // is compatible with the grpc package it is being compiled against.
 // Requires gRPC-Go v1.64.0 or later.
 const _ = grpc.SupportPackageIsVersion9
@@ -27,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// HealthService provides health check endpoints for Kubernetes probes
+// HealthService provides health check endpoints for Kubernetes probes.
 type HealthServiceClient interface {
 	// Liveness check - is the service alive and running?
 	Liveness(ctx context.Context, in *LivenessRequest, opts ...grpc.CallOption) (*LivenessResponse, error)
@@ -64,10 +64,10 @@ func (c *healthServiceClient) Readiness(ctx context.Context, in *ReadinessReques
 }
 
 // HealthServiceServer is the server API for HealthService service.
-// All implementations must embed UnimplementedHealthServiceServer
+// All implementations must embed UnimplementedHealthServiceServer.
 // for forward compatibility.
 //
-// HealthService provides health check endpoints for Kubernetes probes
+// HealthService provides health check endpoints for Kubernetes probes.
 type HealthServiceServer interface {
 	// Liveness check - is the service alive and running?
 	Liveness(context.Context, *LivenessRequest) (*LivenessResponse, error)
@@ -76,7 +76,7 @@ type HealthServiceServer interface {
 	mustEmbedUnimplementedHealthServiceServer()
 }
 
-// UnimplementedHealthServiceServer must be embedded to have
+// UnimplementedHealthServiceServer must be embedded to have.
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
@@ -93,7 +93,7 @@ func (UnimplementedHealthServiceServer) mustEmbedUnimplementedHealthServiceServe
 func (UnimplementedHealthServiceServer) testEmbeddedByValue()                       {}
 
 // UnsafeHealthServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to HealthServiceServer will
+// Use of this interface is not recommended, as added methods to HealthServiceServer will.
 // result in compilation errors.
 type UnsafeHealthServiceServer interface {
 	mustEmbedUnimplementedHealthServiceServer()

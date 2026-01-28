@@ -2,36 +2,36 @@ package uom
 
 import "context"
 
-// Repository defines the interface for UOM persistence
-// This interface is defined in domain, implemented in infrastructure
+// Repository defines the interface for UOM persistence.
+// This interface is defined in domain, implemented in infrastructure.
 type Repository interface {
-	// Create persists a new UOM
+	// Create persists a new UOM.
 	Create(ctx context.Context, uom *UOM) error
 
-	// GetByCode retrieves a UOM by its code
-	GetByCode(ctx context.Context, code UOMCode) (*UOM, error)
+	// GetByCode retrieves a UOM by its code.
+	GetByCode(ctx context.Context, code Code) (*UOM, error)
 
-	// List retrieves UOMs with optional filtering
+	// List retrieves UOMs with optional filtering.
 	List(ctx context.Context, filter ListFilter) ([]*UOM, int64, error)
 
-	// Update persists changes to an existing UOM
+	// Update persists changes to an existing UOM.
 	Update(ctx context.Context, uom *UOM) error
 
-	// Delete removes a UOM by its code
-	Delete(ctx context.Context, code UOMCode) error
+	// Delete removes a UOM by its code.
+	Delete(ctx context.Context, code Code) error
 
-	// ExistsByCode checks if a UOM with the given code exists
-	ExistsByCode(ctx context.Context, code UOMCode) (bool, error)
+	// ExistsByCode checks if a UOM with the given code exists.
+	ExistsByCode(ctx context.Context, code Code) (bool, error)
 }
 
-// ListFilter contains filtering and pagination options for listing UOMs
+// ListFilter contains filtering and pagination options for listing UOMs.
 type ListFilter struct {
 	Category *Category
 	Page     int
 	PageSize int
 }
 
-// Offset calculates the offset for pagination
+// Offset calculates the offset for pagination.
 func (f ListFilter) Offset() int {
 	if f.Page <= 0 {
 		f.Page = 1
@@ -39,7 +39,7 @@ func (f ListFilter) Offset() int {
 	return (f.Page - 1) * f.PageSize
 }
 
-// Limit returns the page size
+// Limit returns the page size.
 func (f ListFilter) Limit() int {
 	if f.PageSize <= 0 {
 		return 10

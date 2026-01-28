@@ -4,25 +4,25 @@ import (
 	"regexp"
 )
 
-// UOMCode is a value object for UOM identifier
-type UOMCode string
+// Code is a value object for UOM identifier.
+type Code string
 
 var uomCodePattern = regexp.MustCompile(`^[A-Z][A-Z0-9_]{0,19}$`)
 
-// NewUOMCode creates a validated UOM code
-func NewUOMCode(code string) (UOMCode, error) {
+// NewUOMCode creates a validated UOM code.
+func NewUOMCode(code string) (Code, error) {
 	if !uomCodePattern.MatchString(code) {
 		return "", ErrInvalidUOMCode
 	}
-	return UOMCode(code), nil
+	return Code(code), nil
 }
 
-// String returns the string representation
-func (c UOMCode) String() string {
+// String returns the string representation.
+func (c Code) String() string {
 	return string(c)
 }
 
-// Category represents the type/category of UOM
+// Category represents the type/category of UOM.
 type Category string
 
 const (
@@ -32,7 +32,7 @@ const (
 	CategoryLength   Category = "LENGTH"
 )
 
-// NewCategory creates a validated category
+// NewCategory creates a validated category.
 func NewCategory(category string) (Category, error) {
 	switch Category(category) {
 	case CategoryWeight, CategoryVolume, CategoryQuantity, CategoryLength:
@@ -42,12 +42,12 @@ func NewCategory(category string) (Category, error) {
 	}
 }
 
-// String returns the string representation
+// String returns the string representation.
 func (c Category) String() string {
 	return string(c)
 }
 
-// IsValid checks if the category is valid
+// IsValid checks if the category is valid.
 func (c Category) IsValid() bool {
 	switch c {
 	case CategoryWeight, CategoryVolume, CategoryQuantity, CategoryLength:

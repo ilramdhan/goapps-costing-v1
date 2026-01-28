@@ -1,13 +1,15 @@
 package config
 
 import (
+	"errors"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/spf13/viper"
 )
 
-// Config holds all application configuration
+// Config holds all application configuration.
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
@@ -15,14 +17,14 @@ type Config struct {
 	Jaeger   JaegerConfig
 }
 
-// ServerConfig holds gRPC and HTTP server configuration
+// ServerConfig holds gRPC and HTTP server configuration.
 type ServerConfig struct {
 	GRPCPort        int           `mapstructure:"grpc_port"`
 	HTTPPort        int           `mapstructure:"http_port"`
 	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout"`
 }
 
-// DatabaseConfig holds PostgreSQL database configuration
+// DatabaseConfig holds PostgreSQL database configuration.
 type DatabaseConfig struct {
 	Host            string        `mapstructure:"host"`
 	Port            int           `mapstructure:"port"`
@@ -35,7 +37,7 @@ type DatabaseConfig struct {
 	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
 }
 
-// RedisConfig holds Redis cache configuration
+// RedisConfig holds Redis cache configuration.
 type RedisConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
@@ -43,13 +45,13 @@ type RedisConfig struct {
 	DB       int    `mapstructure:"db"`
 }
 
-// JaegerConfig holds Jaeger tracing configuration
+// JaegerConfig holds Jaeger tracing configuration.
 type JaegerConfig struct {
 	Enabled  bool   `mapstructure:"enabled"`
 	Endpoint string `mapstructure:"endpoint"`
 }
 
-// Load loads configuration from file and environment variables
+// Load loads configuration from file and environment variables.
 func Load() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -65,7 +67,8 @@ func Load() (*Config, error) {
 
 	// Read config file (optional)
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if !errors.As(err, &configFileNotFoundError) {
 			return nil, err
 		}
 		// Config file not found, will use defaults and env vars
@@ -107,16 +110,12 @@ func setDefaults() {
 	viper.SetDefault("jaeger.endpoint", "http://localhost:14268/api/traces")
 }
 
-// DSN returns the PostgreSQL connection string
+// DSN returns the PostgreSQL connection string.
 func (c *DatabaseConfig) DSN() string {
 	return "host=" + c.Host +
-		" port=" + itoa(c.Port) +
+		" port=" + strconv.Itoa(c.Port) +
 		" user=" + c.User +
 		" password=" + c.Password +
 		" dbname=" + c.DBName +
 		" sslmode=" + c.SSLMode
-}
-
-func itoa(i int) string {
-	return strings.TrimLeft(strings.Replace(viper.GetString("database.port"), " ", "", -1), "0")
 }

@@ -12,12 +12,12 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/config"
 )
 
-// Client wraps the Redis client
+// Client wraps the Redis client.
 type Client struct {
 	rdb *redis.Client
 }
 
-// NewClient creates a new Redis client
+// NewClient creates a new Redis client.
 func NewClient(cfg config.RedisConfig) (*Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
@@ -42,17 +42,17 @@ func NewClient(cfg config.RedisConfig) (*Client, error) {
 	return &Client{rdb: rdb}, nil
 }
 
-// Close closes the Redis connection
+// Close closes the Redis connection.
 func (c *Client) Close() error {
 	return c.rdb.Close()
 }
 
-// HealthCheck verifies the Redis connection is healthy
+// HealthCheck verifies the Redis connection is healthy.
 func (c *Client) HealthCheck(ctx context.Context) error {
 	return c.rdb.Ping(ctx).Err()
 }
 
-// Set stores a value with expiration
+// Set stores a value with expiration.
 func (c *Client) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -61,7 +61,7 @@ func (c *Client) Set(ctx context.Context, key string, value interface{}, expirat
 	return c.rdb.Set(ctx, key, data, expiration).Err()
 }
 
-// Get retrieves a value by key
+// Get retrieves a value by key.
 func (c *Client) Get(ctx context.Context, key string, dest interface{}) error {
 	data, err := c.rdb.Get(ctx, key).Bytes()
 	if err != nil {
@@ -70,12 +70,12 @@ func (c *Client) Get(ctx context.Context, key string, dest interface{}) error {
 	return json.Unmarshal(data, dest)
 }
 
-// Delete removes a key
+// Delete removes a key.
 func (c *Client) Delete(ctx context.Context, keys ...string) error {
 	return c.rdb.Del(ctx, keys...).Err()
 }
 
-// Exists checks if a key exists
+// Exists checks if a key exists.
 func (c *Client) Exists(ctx context.Context, key string) (bool, error) {
 	result, err := c.rdb.Exists(ctx, key).Result()
 	if err != nil {
@@ -84,12 +84,12 @@ func (c *Client) Exists(ctx context.Context, key string) (bool, error) {
 	return result > 0, nil
 }
 
-// Keys returns keys matching a pattern
+// Keys returns keys matching a pattern.
 func (c *Client) Keys(ctx context.Context, pattern string) ([]string, error) {
 	return c.rdb.Keys(ctx, pattern).Result()
 }
 
-// DeleteByPattern deletes all keys matching a pattern
+// DeleteByPattern deletes all keys matching a pattern.
 func (c *Client) DeleteByPattern(ctx context.Context, pattern string) error {
 	keys, err := c.Keys(ctx, pattern)
 	if err != nil {
@@ -101,13 +101,13 @@ func (c *Client) DeleteByPattern(ctx context.Context, pattern string) error {
 	return nil
 }
 
-// Cache key prefixes
+// Cache key prefixes.
 const (
 	UOMKeyPrefix       = "uom:"
 	ParameterKeyPrefix = "param:"
 )
 
-// UOM cache keys
+// UOM cache keys.
 func UOMCacheKey(code string) string {
 	return UOMKeyPrefix + code
 }
@@ -116,7 +116,7 @@ func UOMListCacheKey(page, pageSize int, category string) string {
 	return fmt.Sprintf("%slist:%d:%d:%s", UOMKeyPrefix, page, pageSize, category)
 }
 
-// Parameter cache keys
+// Parameter cache keys.
 func ParameterCacheKey(code string) string {
 	return ParameterKeyPrefix + code
 }

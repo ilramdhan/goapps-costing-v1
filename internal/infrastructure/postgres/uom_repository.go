@@ -9,20 +9,20 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/domain/uom"
 )
 
-// UOMRepository implements uom.Repository interface
+// UOMRepository implements uom.Repository interface.
 type UOMRepository struct {
 	db *DB
 }
 
-// NewUOMRepository creates a new UOM repository
+// NewUOMRepository creates a new UOM repository.
 func NewUOMRepository(db *DB) *UOMRepository {
 	return &UOMRepository{db: db}
 }
 
-// Verify interface implementation at compile time
+// Verify interface implementation at compile time.
 var _ uom.Repository = (*UOMRepository)(nil)
 
-// Create persists a new UOM
+// Create persists a new UOM.
 func (r *UOMRepository) Create(ctx context.Context, entity *uom.UOM) error {
 	query := `
 		INSERT INTO mst_uom (uom_code, uom_name, uom_category, is_base_uom, created_at, created_by)
@@ -41,8 +41,8 @@ func (r *UOMRepository) Create(ctx context.Context, entity *uom.UOM) error {
 	return err
 }
 
-// GetByCode retrieves a UOM by its code
-func (r *UOMRepository) GetByCode(ctx context.Context, code uom.UOMCode) (*uom.UOM, error) {
+// GetByCode retrieves a UOM by its code.
+func (r *UOMRepository) GetByCode(ctx context.Context, code uom.Code) (*uom.UOM, error) {
 	query := `
 		SELECT uom_code, uom_name, uom_category, is_base_uom, 
 		       created_at, created_by, updated_at, updated_by
@@ -105,7 +105,7 @@ func (r *UOMRepository) GetByCode(ctx context.Context, code uom.UOMCode) (*uom.U
 	), nil
 }
 
-// List retrieves UOMs with optional filtering
+// List retrieves UOMs with optional filtering.
 func (r *UOMRepository) List(ctx context.Context, filter uom.ListFilter) ([]*uom.UOM, int64, error) {
 	// Base query
 	baseQuery := `FROM mst_uom WHERE 1=1`
@@ -193,7 +193,7 @@ func (r *UOMRepository) List(ctx context.Context, filter uom.ListFilter) ([]*uom
 	return result, total, rows.Err()
 }
 
-// Update persists changes to an existing UOM
+// Update persists changes to an existing UOM.
 func (r *UOMRepository) Update(ctx context.Context, entity *uom.UOM) error {
 	query := `
 		UPDATE mst_uom
@@ -225,8 +225,8 @@ func (r *UOMRepository) Update(ctx context.Context, entity *uom.UOM) error {
 	return nil
 }
 
-// Delete removes a UOM by its code
-func (r *UOMRepository) Delete(ctx context.Context, code uom.UOMCode) error {
+// Delete removes a UOM by its code.
+func (r *UOMRepository) Delete(ctx context.Context, code uom.Code) error {
 	query := `DELETE FROM mst_uom WHERE uom_code = $1`
 
 	result, err := r.db.ExecContext(ctx, query, code.String())
@@ -245,8 +245,8 @@ func (r *UOMRepository) Delete(ctx context.Context, code uom.UOMCode) error {
 	return nil
 }
 
-// ExistsByCode checks if a UOM with the given code exists
-func (r *UOMRepository) ExistsByCode(ctx context.Context, code uom.UOMCode) (bool, error) {
+// ExistsByCode checks if a UOM with the given code exists.
+func (r *UOMRepository) ExistsByCode(ctx context.Context, code uom.Code) (bool, error) {
 	query := `SELECT EXISTS(SELECT 1 FROM mst_uom WHERE uom_code = $1)`
 
 	var exists bool
@@ -254,7 +254,7 @@ func (r *UOMRepository) ExistsByCode(ctx context.Context, code uom.UOMCode) (boo
 	return exists, err
 }
 
-// Helper function
+// Helper function.
 func itoa(i int) string {
 	return string(rune('0' + i))
 }

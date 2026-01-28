@@ -3,6 +3,7 @@ package interceptors
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 
 	"buf.build/go/protovalidate"
@@ -15,7 +16,7 @@ import (
 	pkgerrors "github.com/homindolenern/goapps-costing-v1/pkg/errors"
 )
 
-// Validation returns a unary server interceptor for protovalidate
+// Validation returns a unary server interceptor for protovalidate.
 func Validation(validator protovalidate.Validator) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
@@ -43,23 +44,27 @@ func Validation(validator protovalidate.Validator) grpc.UnaryServerInterceptor {
 			}
 
 			// Serialize to JSON for error details
-			details, _ := json.Marshal(baseResponse)
+			details, marshalErr := json.Marshal(baseResponse)
+			if marshalErr != nil {
+				return nil, status.Error(codes.InvalidArgument, "Validation failed")
+			}
 
-			return nil, status.Errorf(codes.InvalidArgument, string(details))
+			return nil, status.Error(codes.InvalidArgument, string(details))
 		}
 
 		return handler(ctx, req)
 	}
 }
 
-// parseProtovalidateError parses protovalidate error into structured format
+// parseProtovalidateError parses protovalidate error into structured format.
 func parseProtovalidateError(err error) []*pb.ValidationError {
 	if err == nil {
 		return nil
 	}
 
+	// Use errors.As for proper wrapped error handling
 	var validationErr *protovalidate.ValidationError
-	if ok := isValidationError(err, &validationErr); ok && validationErr != nil {
+	if errors.As(err, &validationErr) {
 		return parseValidationError(validationErr)
 	}
 
@@ -67,18 +72,9 @@ func parseProtovalidateError(err error) []*pb.ValidationError {
 	return parseErrorMessage(err.Error())
 }
 
-// isValidationError checks if error is a protovalidate.ValidationError
-func isValidationError(err error, target **protovalidate.ValidationError) bool {
-	if ve, ok := err.(*protovalidate.ValidationError); ok {
-		*target = ve
-		return true
-	}
-	return false
-}
-
-// parseValidationError parses protovalidate.ValidationError
+// parseValidationError parses protovalidate.ValidationError.
 func parseValidationError(ve *protovalidate.ValidationError) []*pb.ValidationError {
-	errors := make([]*pb.ValidationError, 0)
+	validationErrors := make([]*pb.ValidationError, 0)
 
 	for _, violation := range ve.Violations {
 		field := ""
@@ -99,18 +95,18 @@ func parseValidationError(ve *protovalidate.ValidationError) []*pb.ValidationErr
 			message = violation.String()
 		}
 
-		errors = append(errors, &pb.ValidationError{
+		validationErrors = append(validationErrors, &pb.ValidationError{
 			Field:   field,
 			Message: message,
 		})
 	}
 
-	return errors
+	return validationErrors
 }
 
-// parseErrorMessage is a fallback parser for error messages
+// parseErrorMessage is a fallback parser for error messages.
 func parseErrorMessage(errMsg string) []*pb.ValidationError {
-	errors := make([]*pb.ValidationError, 0)
+	validationErrors := make([]*pb.ValidationError, 0)
 
 	// Try to parse "validation error: field: message" pattern
 	if strings.Contains(errMsg, "validation error:") {
@@ -126,12 +122,12 @@ func parseErrorMessage(errMsg string) []*pb.ValidationError {
 			if colonIdx > 0 {
 				field := strings.TrimSpace(part[:colonIdx])
 				message := strings.TrimSpace(part[colonIdx+1:])
-				errors = append(errors, &pb.ValidationError{
+				validationErrors = append(validationErrors, &pb.ValidationError{
 					Field:   field,
 					Message: message,
 				})
 			} else {
-				errors = append(errors, &pb.ValidationError{
+				validationErrors = append(validationErrors, &pb.ValidationError{
 					Field:   "unknown",
 					Message: part,
 				})
@@ -139,28 +135,28 @@ func parseErrorMessage(errMsg string) []*pb.ValidationError {
 		}
 	}
 
-	if len(errors) == 0 {
-		errors = append(errors, &pb.ValidationError{
+	if len(validationErrors) == 0 {
+		validationErrors = append(validationErrors, &pb.ValidationError{
 			Field:   "request",
 			Message: errMsg,
 		})
 	}
 
-	return errors
+	return validationErrors
 }
 
-// ParseValidationErrors is a helper to convert pkgerrors to pb
+// ParseValidationErrors is a helper to convert pkgerrors to pb.
 func ParseValidationErrors(ve *pkgerrors.ValidationErrors) []*pb.ValidationError {
 	if ve == nil {
 		return nil
 	}
 
-	errors := make([]*pb.ValidationError, 0, len(ve.Errors))
+	validationErrors := make([]*pb.ValidationError, 0, len(ve.Errors))
 	for _, e := range ve.Errors {
-		errors = append(errors, &pb.ValidationError{
+		validationErrors = append(validationErrors, &pb.ValidationError{
 			Field:   e.Field,
 			Message: e.Message,
 		})
 	}
-	return errors
+	return validationErrors
 }

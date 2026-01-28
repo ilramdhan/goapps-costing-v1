@@ -11,20 +11,20 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/domain/parameter"
 )
 
-// ParameterRepository implements parameter.Repository interface
+// ParameterRepository implements parameter.Repository interface.
 type ParameterRepository struct {
 	db *DB
 }
 
-// NewParameterRepository creates a new Parameter repository
+// NewParameterRepository creates a new Parameter repository.
 func NewParameterRepository(db *DB) *ParameterRepository {
 	return &ParameterRepository{db: db}
 }
 
-// Verify interface implementation at compile time
+// Verify interface implementation at compile time.
 var _ parameter.Repository = (*ParameterRepository)(nil)
 
-// Create persists a new Parameter
+// Create persists a new Parameter.
 func (r *ParameterRepository) Create(ctx context.Context, entity *parameter.Parameter) error {
 	// Convert allowed_values to JSONB
 	var allowedValuesJSON []byte
@@ -64,8 +64,8 @@ func (r *ParameterRepository) Create(ctx context.Context, entity *parameter.Para
 	return err
 }
 
-// GetByCode retrieves a Parameter by its code
-func (r *ParameterRepository) GetByCode(ctx context.Context, code parameter.ParameterCode) (*parameter.Parameter, error) {
+// GetByCode retrieves a Parameter by its code.
+func (r *ParameterRepository) GetByCode(ctx context.Context, code parameter.Code) (*parameter.Parameter, error) {
 	query := `
 		SELECT parameter_code, parameter_name, parameter_category, data_type,
 		       uom, min_value, max_value, allowed_values, is_mandatory,
@@ -173,7 +173,7 @@ func (r *ParameterRepository) GetByCode(ctx context.Context, code parameter.Para
 	), nil
 }
 
-// List retrieves Parameters with optional filtering
+// List retrieves Parameters with optional filtering.
 func (r *ParameterRepository) List(ctx context.Context, filter parameter.ListFilter) ([]*parameter.Parameter, int64, error) {
 	// Base query
 	baseQuery := `FROM mst_parameter WHERE 1=1`
@@ -308,7 +308,7 @@ func (r *ParameterRepository) List(ctx context.Context, filter parameter.ListFil
 	return result, total, rows.Err()
 }
 
-// Update persists changes to an existing Parameter
+// Update persists changes to an existing Parameter.
 func (r *ParameterRepository) Update(ctx context.Context, entity *parameter.Parameter) error {
 	var allowedValuesJSON []byte
 	var err error
@@ -358,8 +358,8 @@ func (r *ParameterRepository) Update(ctx context.Context, entity *parameter.Para
 	return nil
 }
 
-// Delete removes a Parameter by its code
-func (r *ParameterRepository) Delete(ctx context.Context, code parameter.ParameterCode) error {
+// Delete removes a Parameter by its code.
+func (r *ParameterRepository) Delete(ctx context.Context, code parameter.Code) error {
 	query := `DELETE FROM mst_parameter WHERE parameter_code = $1`
 
 	result, err := r.db.ExecContext(ctx, query, code.String())
@@ -378,8 +378,8 @@ func (r *ParameterRepository) Delete(ctx context.Context, code parameter.Paramet
 	return nil
 }
 
-// ExistsByCode checks if a Parameter with the given code exists
-func (r *ParameterRepository) ExistsByCode(ctx context.Context, code parameter.ParameterCode) (bool, error) {
+// ExistsByCode checks if a Parameter with the given code exists.
+func (r *ParameterRepository) ExistsByCode(ctx context.Context, code parameter.Code) (bool, error) {
 	query := `SELECT EXISTS(SELECT 1 FROM mst_parameter WHERE parameter_code = $1)`
 
 	var exists bool

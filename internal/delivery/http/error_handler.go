@@ -13,7 +13,7 @@ import (
 	pb "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1"
 )
 
-// CustomErrorHandler handles gRPC errors and returns structured JSON responses
+// CustomErrorHandler handles gRPC errors and returns structured JSON responses.
 func CustomErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
 	s, ok := status.FromError(err)
 	if !ok {
@@ -29,8 +29,8 @@ func CustomErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler ru
 		if jsonErr := json.Unmarshal([]byte(msg), &baseResponse); jsonErr == nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"base": baseResponse,
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"base": &baseResponse,
 			})
 			return
 		}
@@ -41,7 +41,7 @@ func CustomErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler ru
 	statusCode := httpStatusToString(httpStatus)
 
 	response := map[string]interface{}{
-		"base": pb.BaseResponse{
+		"base": &pb.BaseResponse{
 			StatusCode:       statusCode,
 			IsSuccess:        false,
 			Message:          s.Message(),
@@ -51,7 +51,7 @@ func CustomErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler ru
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStatus)
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func httpStatusToString(status int) string {
@@ -81,7 +81,7 @@ func httpStatusToString(status int) string {
 	}
 }
 
-// NewServeMux creates a new gRPC-Gateway ServeMux with custom error handling
+// NewServeMux creates a new gRPC-Gateway ServeMux with custom error handling.
 func NewServeMux() *runtime.ServeMux {
 	return runtime.NewServeMux(
 		runtime.WithErrorHandler(CustomErrorHandler),
