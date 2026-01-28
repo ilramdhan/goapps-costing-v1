@@ -12,12 +12,12 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/config"
 )
 
-// DB wraps the sql.DB with additional functionality
+// DB wraps the sql.DB with additional functionality.
 type DB struct {
 	*sql.DB
 }
 
-// NewConnection creates a new PostgreSQL connection
+// NewConnection creates a new PostgreSQL connection.
 func NewConnection(cfg config.DatabaseConfig) (*DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
@@ -51,12 +51,12 @@ func NewConnection(cfg config.DatabaseConfig) (*DB, error) {
 	return &DB{db}, nil
 }
 
-// Close closes the database connection
+// Close closes the database connection.
 func (db *DB) Close() error {
 	return db.DB.Close()
 }
 
-// HealthCheck verifies the database connection is healthy
+// HealthCheck verifies the database connection is healthy.
 func (db *DB) HealthCheck(ctx context.Context) error {
 	return db.PingContext(ctx)
 }

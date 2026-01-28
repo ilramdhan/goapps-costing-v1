@@ -29,7 +29,7 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/redis"
 )
 
-// swaggerHTML is the Swagger UI HTML template
+// swaggerHTML is the Swagger UI HTML template.
 const swaggerHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -249,12 +249,13 @@ func runHTTPServer(ctx context.Context, cfg *config.Config) error {
 
 	// Swagger UI (must be before gRPC-Gateway catch-all)
 	httpMux.HandleFunc("/swagger/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/swagger/" || r.URL.Path == "/swagger" {
+		switch r.URL.Path {
+		case "/swagger/", "/swagger":
 			w.Header().Set("Content-Type", "text/html")
-			w.Write([]byte(swaggerHTML))
-		} else if r.URL.Path == "/swagger/api.swagger.json" {
+			_, _ = w.Write([]byte(swaggerHTML))
+		case "/swagger/api.swagger.json":
 			http.ServeFile(w, r, "gen/openapi/api.swagger.json")
-		} else {
+		default:
 			http.NotFound(w, r)
 		}
 	})
@@ -278,9 +279,11 @@ func runHTTPServer(ctx context.Context, cfg *config.Config) error {
 	go func() {
 		<-ctx.Done()
 		log.Info().Msg("Shutting down HTTP server...")
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout) //nolint:contextcheck // new context for shutdown is intentional
 		defer cancel()
-		server.Shutdown(shutdownCtx)
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Error().Err(err).Msg("HTTP server shutdown error")
+		}
 	}()
 
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

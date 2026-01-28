@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Recovery returns a unary server interceptor for panic recovery
+// Recovery returns a unary server interceptor for panic recovery.
 func Recovery() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

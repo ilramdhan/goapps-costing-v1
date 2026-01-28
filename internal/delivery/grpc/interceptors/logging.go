@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Logging returns a unary server interceptor for logging
+// Logging returns a unary server interceptor for logging.
 func Logging() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

@@ -8,19 +8,19 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/redis"
 )
 
-// HealthHandler implements the gRPC HealthService
+// HealthHandler implements the gRPC HealthService.
 type HealthHandler struct {
 	pb.UnimplementedHealthServiceServer
 	db    *postgres.DB
 	redis *redis.Client
 }
 
-// NewHealthHandler creates a new health handler (PostgreSQL only)
+// NewHealthHandler creates a new health handler (PostgreSQL only).
 func NewHealthHandler(db *postgres.DB) *HealthHandler {
 	return &HealthHandler{db: db}
 }
 
-// NewHealthHandlerWithRedis creates a new health handler with Redis support
+// NewHealthHandlerWithRedis creates a new health handler with Redis support.
 func NewHealthHandlerWithRedis(db *postgres.DB, redis *redis.Client) *HealthHandler {
 	return &HealthHandler{db: db, redis: redis}
 }

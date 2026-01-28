@@ -9,7 +9,7 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/domain/parameter"
 )
 
-// ParameterHandler implements the gRPC ParameterService
+// ParameterHandler implements the gRPC ParameterService.
 type ParameterHandler struct {
 	pb.UnimplementedParameterServiceServer
 	createHandler *appparam.CreateHandler
@@ -20,7 +20,7 @@ type ParameterHandler struct {
 	validator     *ValidationHelper
 }
 
-// NewParameterHandler creates a new Parameter handler
+// NewParameterHandler creates a new Parameter handler.
 func NewParameterHandler(
 	createHandler *appparam.CreateHandler,
 	updateHandler *appparam.UpdateHandler,
@@ -39,7 +39,7 @@ func NewParameterHandler(
 	}
 }
 
-// CreateParameter creates a new Parameter
+// CreateParameter creates a new Parameter.
 func (h *ParameterHandler) CreateParameter(ctx context.Context, req *pb.CreateParameterRequest) (*pb.CreateParameterResponse, error) {
 	// Validate request
 	if validationResp := h.validator.Validate(ctx, req); validationResp != nil {
@@ -73,7 +73,7 @@ func (h *ParameterHandler) CreateParameter(ctx context.Context, req *pb.CreatePa
 	}, nil
 }
 
-// GetParameter retrieves a Parameter by code
+// GetParameter retrieves a Parameter by code.
 func (h *ParameterHandler) GetParameter(ctx context.Context, req *pb.GetParameterRequest) (*pb.GetParameterResponse, error) {
 	query := appparam.GetQuery{ParameterCode: req.ParameterCode}
 
@@ -90,7 +90,7 @@ func (h *ParameterHandler) GetParameter(ctx context.Context, req *pb.GetParamete
 	}, nil
 }
 
-// ListParameters retrieves a paginated list of Parameters
+// ListParameters retrieves a paginated list of Parameters.
 func (h *ParameterHandler) ListParameters(ctx context.Context, req *pb.ListParametersRequest) (*pb.ListParametersResponse, error) {
 	query := appparam.ListQuery{
 		Page:     int(req.Page),
@@ -135,7 +135,7 @@ func (h *ParameterHandler) ListParameters(ctx context.Context, req *pb.ListParam
 	}, nil
 }
 
-// UpdateParameter updates an existing Parameter
+// UpdateParameter updates an existing Parameter.
 func (h *ParameterHandler) UpdateParameter(ctx context.Context, req *pb.UpdateParameterRequest) (*pb.UpdateParameterResponse, error) {
 	cmd := appparam.UpdateCommand{
 		ParameterCode: req.ParameterCode,
@@ -165,7 +165,7 @@ func (h *ParameterHandler) UpdateParameter(ctx context.Context, req *pb.UpdatePa
 	}, nil
 }
 
-// DeleteParameter deletes a Parameter by code
+// DeleteParameter deletes a Parameter by code.
 func (h *ParameterHandler) DeleteParameter(ctx context.Context, req *pb.DeleteParameterRequest) (*pb.DeleteParameterResponse, error) {
 	cmd := appparam.DeleteCommand{ParameterCode: req.ParameterCode}
 
@@ -181,7 +181,7 @@ func (h *ParameterHandler) DeleteParameter(ctx context.Context, req *pb.DeletePa
 	}, nil
 }
 
-// Helper functions
+// Helper functions.
 
 func pbParamCategoryToString(cat pb.ParameterCategory) string {
 	switch cat {
@@ -195,9 +195,10 @@ func pbParamCategoryToString(cat pb.ParameterCategory) string {
 		return "OUTPUT"
 	case pb.ParameterCategory_PARAMETER_CATEGORY_PROCESS:
 		return "PROCESS"
-	default:
+	case pb.ParameterCategory_PARAMETER_CATEGORY_UNSPECIFIED:
 		return ""
 	}
+	return ""
 }
 
 func stringToPbParamCategory(cat string) pb.ParameterCategory {
@@ -227,9 +228,10 @@ func pbDataTypeToString(dt pb.ParameterDataType) string {
 		return "BOOLEAN"
 	case pb.ParameterDataType_PARAMETER_DATA_TYPE_DROPDOWN:
 		return "DROPDOWN"
-	default:
+	case pb.ParameterDataType_PARAMETER_DATA_TYPE_UNSPECIFIED:
 		return ""
 	}
+	return ""
 }
 
 func stringToPbDataType(dt string) pb.ParameterDataType {

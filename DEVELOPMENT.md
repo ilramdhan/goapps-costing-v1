@@ -965,6 +965,203 @@ Semua response menggunakan `BaseResponse`:
 }
 ```
 
+### Lint Error Prevention
+
+Project ini menggunakan **golangci-lint** dengan konfigurasi ketat. Berikut panduan untuk menghindari lint error yang umum terjadi:
+
+#### Pre-Commit Checklist
+```bash
+# WAJIB jalankan sebelum commit:
+go build ./...              # Pastikan build pass
+golangci-lint run           # Pastikan 0 errors
+go test -v ./...            # Pastikan tests pass
+```
+
+#### Install golangci-lint
+```bash
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+go install golang.org/x/tools/cmd/goimports@latest
+```
+
+#### Common Lint Errors & Solutions
+
+##### 1. godot: Comment should end in a period
+❌ **Error**:
+```go
+// CreateHandler handles the creation of UOM
+type CreateHandler struct {}
+```
+
+✅ **Solution**: Semua exported comments HARUS diakhiri dengan titik.
+```go
+// CreateHandler handles the creation of UOM.
+type CreateHandler struct {}
+```
+
+> **TIP**: Untuk multi-line comment, titik ada di akhir paragraf, bukan di setiap baris.
+
+##### 2. revive: Type stuttering
+❌ **Error**:
+```go
+package uom
+
+type UOMCode struct { value string }  // BAD: "uom.UOMCode" stutters
+```
+
+✅ **Solution**: Gunakan nama yang singkat karena package name sudah menjelaskan context.
+```go
+package uom
+
+type Code struct { value string }  // GOOD: "uom.Code"
+```
+
+##### 3. errorlint: Type assertion on error
+❌ **Error**:
+```go
+if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+    return nil, err
+}
+```
+
+✅ **Solution**: Gunakan `errors.As` untuk handle wrapped errors.
+```go
+var configFileNotFoundError viper.ConfigFileNotFoundError
+if !errors.As(err, &configFileNotFoundError) {
+    return nil, err
+}
+```
+
+##### 4. exhaustive: Missing switch cases
+❌ **Error**:
+```go
+switch cat {
+case pb.UOMCategory_UOM_CATEGORY_WEIGHT:
+    return "WEIGHT"
+default:
+    return ""
+}  // Missing UNSPECIFIED case!
+```
+
+✅ **Solution**: Handle semua enum values termasuk UNSPECIFIED.
+```go
+switch cat {
+case pb.UOMCategory_UOM_CATEGORY_WEIGHT:
+    return "WEIGHT"
+case pb.UOMCategory_UOM_CATEGORY_UNSPECIFIED:
+    return ""
+}
+return ""  // fallback
+```
+
+##### 5. copylocks: Copying mutex value
+❌ **Error**:
+```go
+response := map[string]interface{}{
+    "base": pb.BaseResponse{...},  // BAD: copies protobuf struct with mutex
+}
+```
+
+✅ **Solution**: Gunakan pointer untuk protobuf structs.
+```go
+response := map[string]interface{}{
+    "base": &pb.BaseResponse{...},  // GOOD: pointer reference
+}
+```
+
+##### 6. predeclared: Shadowing built-in identifiers
+❌ **Error**:
+```go
+min := 100.0  // BAD: shadows built-in min()
+max := 200.0  // BAD: shadows built-in max()
+```
+
+✅ **Solution**: Gunakan nama yang lebih spesifik.
+```go
+minVal := 100.0   // GOOD
+maxVal := 200.0   // GOOD
+minFloat := 100.0 // GOOD
+```
+
+##### 7. goimports: File not properly formatted
+❌ **Error**: Import groups tidak benar atau tidak sorted.
+
+✅ **Solution**: Jalankan goimports sebelum commit.
+```bash
+goimports -w .
+# atau untuk file spesifik
+goimports -w internal/domain/uom/entity.go
+```
+
+##### 8. gocritic: ifElseChain should be switch
+❌ **Error**:
+```go
+if path == "/swagger/" {
+    // ...
+} else if path == "/swagger/api.json" {
+    // ...
+} else {
+    // ...
+}
+```
+
+✅ **Solution**: Gunakan switch statement.
+```go
+switch path {
+case "/swagger/":
+    // ...
+case "/swagger/api.json":
+    // ...
+default:
+    // ...
+}
+```
+
+##### 9. errcheck: Unchecked error return
+❌ **Error**:
+```go
+w.Write([]byte(html))  // BAD: ignoring error
+json.NewEncoder(w).Encode(data)  // BAD: ignoring error
+```
+
+✅ **Solution**: Handle error atau explicitly ignore dengan `_ =`.
+```go
+_, _ = w.Write([]byte(html))  // Explicitly ignored (acceptable for http.ResponseWriter)
+_ = json.NewEncoder(w).Encode(data)
+```
+
+> **NOTE**: Untuk http.ResponseWriter.Write, error biasanya tidak actionable, jadi explicitly ignore acceptable.
+
+#### Automatic Fixes
+```bash
+# Fix import formatting
+goimports -w .
+
+# Fix general formatting
+gofmt -w .
+
+# Fix all godot issues (add periods to comments)
+find . -name "*.go" -type f ! -path "./gen/*" ! -path "./vendor/*" \
+  -exec sed -i 's/^\/\/ \([A-Z][a-zA-Z0-9_]*\) \(.*[a-zA-Z0-9)]\)$/\/\/ \1 \2./g' {} \;
+```
+
+#### IDE Setup (Recommended)
+Configure IDE untuk auto-run golangci-lint on save:
+
+**GoLand/IntelliJ**:
+1. Settings → Tools → File Watchers
+2. Add golangci-lint watcher
+
+**VSCode**:
+```json
+// .vscode/settings.json
+{
+  "go.lintTool": "golangci-lint",
+  "go.lintOnSave": "workspace",
+  "editor.formatOnSave": true,
+  "go.formatTool": "goimports"
+}
+```
+
 ---
 
 ## 8. Git Workflow

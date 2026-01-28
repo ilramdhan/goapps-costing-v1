@@ -13,7 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Config holds tracing configuration
+// Config holds tracing configuration.
 type Config struct {
 	Enabled     bool
 	ServiceName string
@@ -21,13 +21,13 @@ type Config struct {
 	SampleRate  float64
 }
 
-// Tracer wraps OpenTelemetry tracer
+// Tracer wraps OpenTelemetry tracer.
 type Tracer struct {
 	tracer   trace.Tracer
 	provider *sdktrace.TracerProvider
 }
 
-// New creates a new tracer with OTLP HTTP exporter
+// New creates a new tracer with OTLP HTTP exporter.
 func New(ctx context.Context, cfg Config) (*Tracer, error) {
 	if !cfg.Enabled {
 		return nil, nil
@@ -72,7 +72,7 @@ func New(ctx context.Context, cfg Config) (*Tracer, error) {
 	}, nil
 }
 
-// Shutdown shuts down the tracer
+// Shutdown shuts down the tracer.
 func (t *Tracer) Shutdown(ctx context.Context) error {
 	if t == nil || t.provider == nil {
 		return nil
@@ -80,7 +80,7 @@ func (t *Tracer) Shutdown(ctx context.Context) error {
 	return t.provider.Shutdown(ctx)
 }
 
-// StartSpan starts a new span
+// StartSpan starts a new span.
 func (t *Tracer) StartSpan(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
 	if t == nil || t.tracer == nil {
 		return ctx, trace.SpanFromContext(ctx)
@@ -88,7 +88,7 @@ func (t *Tracer) StartSpan(ctx context.Context, name string, opts ...trace.SpanS
 	return t.tracer.Start(ctx, name, opts...)
 }
 
-// AddEvent adds an event to the current span
+// AddEvent adds an event to the current span.
 func AddEvent(ctx context.Context, name string, attrs ...attribute.KeyValue) {
 	span := trace.SpanFromContext(ctx)
 	if span != nil {
@@ -96,7 +96,7 @@ func AddEvent(ctx context.Context, name string, attrs ...attribute.KeyValue) {
 	}
 }
 
-// SetAttributes sets attributes on the current span
+// SetAttributes sets attributes on the current span.
 func SetAttributes(ctx context.Context, attrs ...attribute.KeyValue) {
 	span := trace.SpanFromContext(ctx)
 	if span != nil {
@@ -104,7 +104,7 @@ func SetAttributes(ctx context.Context, attrs ...attribute.KeyValue) {
 	}
 }
 
-// RecordError records an error on the current span
+// RecordError records an error on the current span.
 func RecordError(ctx context.Context, err error) {
 	if err == nil {
 		return

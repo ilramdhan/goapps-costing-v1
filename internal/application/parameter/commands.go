@@ -6,7 +6,7 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/domain/parameter"
 )
 
-// CreateCommand represents the create Parameter command
+// CreateCommand represents the create Parameter command.
 type CreateCommand struct {
 	ParameterCode string
 	ParameterName string
@@ -21,17 +21,17 @@ type CreateCommand struct {
 	CreatedBy     string
 }
 
-// CreateHandler handles the CreateParameter command
+// CreateHandler handles the CreateParameter command.
 type CreateHandler struct {
 	repo parameter.Repository
 }
 
-// NewCreateHandler creates a new create handler
+// NewCreateHandler creates a new create handler.
 func NewCreateHandler(repo parameter.Repository) *CreateHandler {
 	return &CreateHandler{repo: repo}
 }
 
-// Handle executes the create command
+// Handle executes the create command.
 func (h *CreateHandler) Handle(ctx context.Context, cmd CreateCommand) (*parameter.Parameter, error) {
 	// 1. Create and validate value objects
 	code, err := parameter.NewParameterCode(cmd.ParameterCode)
@@ -84,7 +84,7 @@ func (h *CreateHandler) Handle(ctx context.Context, cmd CreateCommand) (*paramet
 	return entity, nil
 }
 
-// UpdateCommand represents the update Parameter command
+// UpdateCommand represents the update Parameter command.
 type UpdateCommand struct {
 	ParameterCode string
 	ParameterName string
@@ -100,17 +100,17 @@ type UpdateCommand struct {
 	UpdatedBy     string
 }
 
-// UpdateHandler handles the UpdateParameter command
+// UpdateHandler handles the UpdateParameter command.
 type UpdateHandler struct {
 	repo parameter.Repository
 }
 
-// NewUpdateHandler creates a new update handler
+// NewUpdateHandler creates a new update handler.
 func NewUpdateHandler(repo parameter.Repository) *UpdateHandler {
 	return &UpdateHandler{repo: repo}
 }
 
-// Handle executes the update command
+// Handle executes the update command.
 func (h *UpdateHandler) Handle(ctx context.Context, cmd UpdateCommand) (*parameter.Parameter, error) {
 	// 1. Create value objects
 	code, err := parameter.NewParameterCode(cmd.ParameterCode)
@@ -164,22 +164,22 @@ func (h *UpdateHandler) Handle(ctx context.Context, cmd UpdateCommand) (*paramet
 	return entity, nil
 }
 
-// DeleteCommand represents the delete Parameter command
+// DeleteCommand represents the delete Parameter command.
 type DeleteCommand struct {
 	ParameterCode string
 }
 
-// DeleteHandler handles the DeleteParameter command
+// DeleteHandler handles the DeleteParameter command.
 type DeleteHandler struct {
 	repo parameter.Repository
 }
 
-// NewDeleteHandler creates a new delete handler
+// NewDeleteHandler creates a new delete handler.
 func NewDeleteHandler(repo parameter.Repository) *DeleteHandler {
 	return &DeleteHandler{repo: repo}
 }
 
-// Handle executes the delete command
+// Handle executes the delete command.
 func (h *DeleteHandler) Handle(ctx context.Context, cmd DeleteCommand) error {
 	code, err := parameter.NewParameterCode(cmd.ParameterCode)
 	if err != nil {

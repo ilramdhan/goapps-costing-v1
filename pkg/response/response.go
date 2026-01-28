@@ -5,15 +5,15 @@ import (
 	pkgerrors "github.com/homindolenern/goapps-costing-v1/pkg/errors"
 )
 
-// Builder helps construct consistent responses
+// Builder helps construct consistent responses.
 type Builder struct{}
 
-// New creates a new response builder
+// New creates a new response builder.
 func New() *Builder {
 	return &Builder{}
 }
 
-// Success creates a success base response
+// Success creates a success base response.
 func (b *Builder) Success(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "200",
@@ -23,7 +23,7 @@ func (b *Builder) Success(message string) *pb.BaseResponse {
 	}
 }
 
-// Created creates a created response (201)
+// Created creates a created response (201).
 func (b *Builder) Created(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "201",
@@ -33,7 +33,7 @@ func (b *Builder) Created(message string) *pb.BaseResponse {
 	}
 }
 
-// ValidationError creates a validation error response
+// ValidationError creates a validation error response.
 func (b *Builder) ValidationError(errors *pkgerrors.ValidationErrors) *pb.BaseResponse {
 	validationErrors := make([]*pb.ValidationError, 0, len(errors.Errors))
 	for _, e := range errors.Errors {
@@ -51,7 +51,7 @@ func (b *Builder) ValidationError(errors *pkgerrors.ValidationErrors) *pb.BaseRe
 	}
 }
 
-// NotFound creates a not found response
+// NotFound creates a not found response.
 func (b *Builder) NotFound(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "404",
@@ -61,7 +61,7 @@ func (b *Builder) NotFound(message string) *pb.BaseResponse {
 	}
 }
 
-// Conflict creates a conflict response (already exists)
+// Conflict creates a conflict response (already exists).
 func (b *Builder) Conflict(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "409",
@@ -71,7 +71,7 @@ func (b *Builder) Conflict(message string) *pb.BaseResponse {
 	}
 }
 
-// BadRequest creates a bad request response
+// BadRequest creates a bad request response.
 func (b *Builder) BadRequest(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "400",
@@ -81,7 +81,7 @@ func (b *Builder) BadRequest(message string) *pb.BaseResponse {
 	}
 }
 
-// InternalError creates an internal server error response
+// InternalError creates an internal server error response.
 func (b *Builder) InternalError(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "500",
@@ -91,7 +91,7 @@ func (b *Builder) InternalError(message string) *pb.BaseResponse {
 	}
 }
 
-// Unauthorized creates an unauthorized response
+// Unauthorized creates an unauthorized response.
 func (b *Builder) Unauthorized(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "401",
@@ -101,7 +101,7 @@ func (b *Builder) Unauthorized(message string) *pb.BaseResponse {
 	}
 }
 
-// Forbidden creates a forbidden response
+// Forbidden creates a forbidden response.
 func (b *Builder) Forbidden(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "403",
@@ -111,7 +111,7 @@ func (b *Builder) Forbidden(message string) *pb.BaseResponse {
 	}
 }
 
-// RateLimited creates a rate limited response
+// RateLimited creates a rate limited response.
 func (b *Builder) RateLimited(message string) *pb.BaseResponse {
 	return &pb.BaseResponse{
 		StatusCode:       "429",
@@ -121,10 +121,10 @@ func (b *Builder) RateLimited(message string) *pb.BaseResponse {
 	}
 }
 
-// Global builder instance for convenience
+// Default is the global builder instance for convenience.
 var Default = New()
 
-// Convenience functions using default builder
+// Convenience functions using default builder.
 func Success(message string) *pb.BaseResponse       { return Default.Success(message) }
 func Created(message string) *pb.BaseResponse       { return Default.Created(message) }
 func NotFound(message string) *pb.BaseResponse      { return Default.NotFound(message) }
@@ -135,6 +135,7 @@ func Unauthorized(message string) *pb.BaseResponse  { return Default.Unauthorize
 func Forbidden(message string) *pb.BaseResponse     { return Default.Forbidden(message) }
 func RateLimited(message string) *pb.BaseResponse   { return Default.RateLimited(message) }
 
-func ValidationError(errors *pkgerrors.ValidationErrors) *pb.BaseResponse {
+// ValidationErrorFromPkg creates validation error from validation errors.
+func ValidationErrorFromPkg(errors *pkgerrors.ValidationErrors) *pb.BaseResponse {
 	return Default.ValidationError(errors)
 }

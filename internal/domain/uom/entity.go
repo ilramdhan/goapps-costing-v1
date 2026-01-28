@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Domain errors
+// Domain errors.
 var (
 	ErrNotFound        = errors.New("uom not found")
 	ErrAlreadyExists   = errors.New("uom already exists")
@@ -15,9 +15,9 @@ var (
 	ErrInvalidCategory = errors.New("invalid uom category")
 )
 
-// UOM is the aggregate root for Unit of Measure
+// UOM is the aggregate root for Unit of Measure.
 type UOM struct {
-	code      UOMCode
+	code      Code
 	name      string
 	category  Category
 	isBaseUOM bool
@@ -27,8 +27,8 @@ type UOM struct {
 	updatedBy *string
 }
 
-// NewUOM creates a new UOM with validation
-func NewUOM(code UOMCode, name string, category Category, createdBy string) (*UOM, error) {
+// NewUOM creates a new UOM with validation.
+func NewUOM(code Code, name string, category Category, createdBy string) (*UOM, error) {
 	if name == "" {
 		return nil, ErrEmptyName
 	}
@@ -46,9 +46,9 @@ func NewUOM(code UOMCode, name string, category Category, createdBy string) (*UO
 	}, nil
 }
 
-// Reconstitute creates a UOM from persistence (no validation, used by repository)
+// Reconstitute creates a UOM from persistence (no validation, used by repository).
 func Reconstitute(
-	code UOMCode,
+	code Code,
 	name string,
 	category Category,
 	isBaseUOM bool,
@@ -69,8 +69,8 @@ func Reconstitute(
 	}
 }
 
-// Getters - expose internal state read-only
-func (u *UOM) Code() UOMCode         { return u.code }
+// Getters - expose internal state read-only.
+func (u *UOM) Code() Code            { return u.code }
 func (u *UOM) Name() string          { return u.name }
 func (u *UOM) Category() Category    { return u.category }
 func (u *UOM) IsBaseUOM() bool       { return u.isBaseUOM }
@@ -79,12 +79,12 @@ func (u *UOM) CreatedBy() string     { return u.createdBy }
 func (u *UOM) UpdatedAt() *time.Time { return u.updatedAt }
 func (u *UOM) UpdatedBy() *string    { return u.updatedBy }
 
-// SetAsBaseUOM marks this UOM as the base unit for its category
+// SetAsBaseUOM marks this UOM as the base unit for its category.
 func (u *UOM) SetAsBaseUOM() {
 	u.isBaseUOM = true
 }
 
-// Update updates the UOM properties
+// Update updates the UOM properties.
 func (u *UOM) Update(name string, category Category, isBaseUOM bool, updatedBy string) error {
 	if name == "" {
 		return ErrEmptyName
