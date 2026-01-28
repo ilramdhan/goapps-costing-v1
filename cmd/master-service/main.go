@@ -10,7 +10,6 @@ import (
 	"syscall"
 
 	"buf.build/go/protovalidate"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -25,9 +24,43 @@ import (
 	"github.com/homindolenern/goapps-costing-v1/internal/config"
 	grpcdelivery "github.com/homindolenern/goapps-costing-v1/internal/delivery/grpc"
 	"github.com/homindolenern/goapps-costing-v1/internal/delivery/grpc/interceptors"
+	httpdelivery "github.com/homindolenern/goapps-costing-v1/internal/delivery/http"
 	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/postgres"
 	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/redis"
 )
+
+// swaggerHTML is the Swagger UI HTML template
+const swaggerHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Costing API - Swagger UI</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+  <style>
+    html { box-sizing: border-box; overflow-y: scroll; }
+    *, *:before, *:after { box-sizing: inherit; }
+    body { margin: 0; background: #fafafa; }
+    .topbar { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function() {
+      SwaggerUIBundle({
+        url: "/swagger/api.swagger.json",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+        layout: "StandaloneLayout"
+      });
+    };
+  </script>
+</body>
+</html>`
 
 func main() {
 	// Setup zerolog
@@ -189,7 +222,7 @@ func runGRPCServer(
 }
 
 func runHTTPServer(ctx context.Context, cfg *config.Config) error {
-	mux := runtime.NewServeMux()
+	mux := httpdelivery.NewServeMux()
 
 	// Connect to gRPC server
 	grpcAddr := fmt.Sprintf("localhost:%d", cfg.Server.GRPCPort)
@@ -209,11 +242,24 @@ func runHTTPServer(ctx context.Context, cfg *config.Config) error {
 	// Create HTTP server with additional endpoints
 	httpMux := http.NewServeMux()
 
-	// gRPC-Gateway handler
-	httpMux.Handle("/", mux)
+	// Swagger UI (must be before gRPC-Gateway catch-all)
+	httpMux.HandleFunc("/swagger/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/swagger/" || r.URL.Path == "/swagger" {
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(swaggerHTML))
+		} else if r.URL.Path == "/swagger/api.swagger.json" {
+			http.ServeFile(w, r, "gen/openapi/api.swagger.json")
+		} else {
+			http.NotFound(w, r)
+		}
+	})
+	httpMux.Handle("/swagger", http.RedirectHandler("/swagger/", http.StatusMovedPermanently))
 
 	// Prometheus metrics endpoint
 	httpMux.Handle("/metrics", promhttp.Handler())
+
+	// gRPC-Gateway handler (catch-all, must be last)
+	httpMux.Handle("/", mux)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.HTTPPort)
 	server := &http.Server{
