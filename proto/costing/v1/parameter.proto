@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package costing.v1;
+
+option go_package = "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1;costingv1";
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "costing/v1/common.proto";
+
+// ParameterService provides CRUD operations for Parameters
+service ParameterService {
+  // CreateParameter creates a new Parameter
+  rpc CreateParameter(CreateParameterRequest) returns (CreateParameterResponse) {
+    option (google.api.http) = {
+      post: "/v1/parameters"
+      body: "*"
+    };
+  }
+
+  // GetParameter retrieves a Parameter by code
+  rpc GetParameter(GetParameterRequest) returns (GetParameterResponse) {
+    option (google.api.http) = {
+      get: "/v1/parameters/{parameter_code}"
+    };
+  }
+
+  // ListParameters retrieves a paginated list of Parameters
+  rpc ListParameters(ListParametersRequest) returns (ListParametersResponse) {
+    option (google.api.http) = {
+      get: "/v1/parameters"
+    };
+  }
+
+  // UpdateParameter updates an existing Parameter
+  rpc UpdateParameter(UpdateParameterRequest) returns (UpdateParameterResponse) {
+    option (google.api.http) = {
+      put: "/v1/parameters/{parameter_code}"
+      body: "*"
+    };
+  }
+
+  // DeleteParameter deletes a Parameter by code
+  rpc DeleteParameter(DeleteParameterRequest) returns (DeleteParameterResponse) {
+    option (google.api.http) = {
+      delete: "/v1/parameters/{parameter_code}"
+    };
+  }
+}
+
+// Parameter represents a configuration parameter entity
+message Parameter {
+  string parameter_code = 1;
+  string parameter_name = 2;
+  ParameterCategory parameter_category = 3;
+  ParameterDataType data_type = 4;
+  optional string uom = 5;
+  optional double min_value = 6;
+  optional double max_value = 7;
+  repeated string allowed_values = 8; // For DROPDOWN type
+  bool is_mandatory = 9;
+  optional string description = 10;
+  bool is_active = 11;
+  AuditInfo audit = 12;
+}
+
+// ParameterCategory represents the type of parameter
+enum ParameterCategory {
+  PARAMETER_CATEGORY_UNSPECIFIED = 0;
+  PARAMETER_CATEGORY_MACHINE = 1;    // Machine-related parameters
+  PARAMETER_CATEGORY_MATERIAL = 2;   // Material-related parameters
+  PARAMETER_CATEGORY_QUALITY = 3;    // Quality-related parameters
+  PARAMETER_CATEGORY_OUTPUT = 4;     // Output/production parameters
+  PARAMETER_CATEGORY_PROCESS = 5;    // Process-related parameters
+}
+
+// ParameterDataType represents the data type of parameter value
+enum ParameterDataType {
+  PARAMETER_DATA_TYPE_UNSPECIFIED = 0;
+  PARAMETER_DATA_TYPE_NUMERIC = 1;
+  PARAMETER_DATA_TYPE_TEXT = 2;
+  PARAMETER_DATA_TYPE_BOOLEAN = 3;
+  PARAMETER_DATA_TYPE_DROPDOWN = 4;
+}
+
+// CreateParameter
+message CreateParameterRequest {
+  string parameter_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 50,
+    pattern: "^[A-Z][A-Z0-9_]*$"
+  }];
+  
+  string parameter_name = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 200
+  }];
+  
+  ParameterCategory parameter_category = 3 [(buf.validate.field).enum = {
+    defined_only: true,
+    not_in: [0]
+  }];
+  
+  ParameterDataType data_type = 4 [(buf.validate.field).enum = {
+    defined_only: true,
+    not_in: [0]
+  }];
+  
+  optional string uom = 5 [(buf.validate.field).string = {max_len: 20}];
+  
+  optional double min_value = 6;
+  optional double max_value = 7;
+  
+  repeated string allowed_values = 8;
+  
+  bool is_mandatory = 9;
+  
+  optional string description = 10 [(buf.validate.field).string = {max_len: 1000}];
+  
+  bool is_active = 11;
+}
+
+message CreateParameterResponse {
+  BaseResponse base = 1;
+  Parameter data = 2;
+}
+
+// GetParameter
+message GetParameterRequest {
+  string parameter_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 50
+  }];
+}
+
+message GetParameterResponse {
+  BaseResponse base = 1;
+  Parameter data = 2;
+}
+
+// ListParameters
+message ListParametersRequest {
+  int32 page = 1 [(buf.validate.field).int32 = {gte: 1}];
+  int32 page_size = 2 [(buf.validate.field).int32 = {gte: 1, lte: 100}];
+  optional ParameterCategory category = 3;
+  optional bool is_active = 4;
+}
+
+message ListParametersResponse {
+  BaseResponse base = 1;
+  repeated Parameter data = 2;
+  PaginationMeta pagination = 3;
+}
+
+// UpdateParameter
+message UpdateParameterRequest {
+  string parameter_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 50
+  }];
+  
+  string parameter_name = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 200
+  }];
+  
+  ParameterCategory parameter_category = 3 [(buf.validate.field).enum = {
+    defined_only: true,
+    not_in: [0]
+  }];
+  
+  ParameterDataType data_type = 4 [(buf.validate.field).enum = {
+    defined_only: true,
+    not_in: [0]
+  }];
+  
+  optional string uom = 5;
+  optional double min_value = 6;
+  optional double max_value = 7;
+  repeated string allowed_values = 8;
+  bool is_mandatory = 9;
+  optional string description = 10;
+  bool is_active = 11;
+}
+
+message UpdateParameterResponse {
+  BaseResponse base = 1;
+  Parameter data = 2;
+}
+
+// DeleteParameter
+message DeleteParameterRequest {
+  string parameter_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 50
+  }];
+}
+
+message DeleteParameterResponse {
+  BaseResponse base = 1;
+}

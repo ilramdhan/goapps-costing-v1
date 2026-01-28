@@ -1,0 +1,28 @@
+# Yarn Costing Service Configuration
+# This file is optional - environment variables take precedence
+
+server:
+  grpc_port: 9090
+  http_port: 8080
+  shutdown_timeout: 30s
+
+database:
+  host: localhost
+  port: 5433  # Using 5433 to match docker-compose (avoids conflict with local PostgreSQL)
+  user: postgres
+  password: postgres
+  dbname: costing_db
+  sslmode: disable
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: 5m
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0
+
+jaeger:
+  enabled: false
+  endpoint: http://localhost:14268/api/traces

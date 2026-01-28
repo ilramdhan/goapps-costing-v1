@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package costing.v1;
+
+option go_package = "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1;costingv1";
+
+// ValidationError represents a single field validation error
+message ValidationError {
+  string field = 1;
+  string message = 2;
+}
+
+// BaseResponse is included in all API responses for consistent structure
+message BaseResponse {
+  repeated ValidationError validation_errors = 1;
+  string status_code = 2;
+  bool is_success = 3;
+  string message = 4;
+}
+
+// PaginationMeta contains pagination information for list responses
+message PaginationMeta {
+  int32 current_page = 1;
+  int32 page_size = 2;
+  int64 total_items = 3;
+  int32 total_pages = 4;
+}
+
+// Timestamp fields for audit
+message AuditInfo {
+  string created_at = 1;
+  string created_by = 2;
+  optional string updated_at = 3;
+  optional string updated_by = 4;
+}

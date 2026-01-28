@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package costing.v1;
+
+option go_package = "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1;costingv1";
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "costing/v1/common.proto";
+
+// UOMService provides CRUD operations for Unit of Measure
+service UOMService {
+  // CreateUOM creates a new Unit of Measure
+  rpc CreateUOM(CreateUOMRequest) returns (CreateUOMResponse) {
+    option (google.api.http) = {
+      post: "/v1/uoms"
+      body: "*"
+    };
+  }
+
+  // GetUOM retrieves a Unit of Measure by code
+  rpc GetUOM(GetUOMRequest) returns (GetUOMResponse) {
+    option (google.api.http) = {
+      get: "/v1/uoms/{uom_code}"
+    };
+  }
+
+  // ListUOMs retrieves a paginated list of Units of Measure
+  rpc ListUOMs(ListUOMsRequest) returns (ListUOMsResponse) {
+    option (google.api.http) = {
+      get: "/v1/uoms"
+    };
+  }
+
+  // UpdateUOM updates an existing Unit of Measure
+  rpc UpdateUOM(UpdateUOMRequest) returns (UpdateUOMResponse) {
+    option (google.api.http) = {
+      put: "/v1/uoms/{uom_code}"
+      body: "*"
+    };
+  }
+
+  // DeleteUOM deletes a Unit of Measure by code
+  rpc DeleteUOM(DeleteUOMRequest) returns (DeleteUOMResponse) {
+    option (google.api.http) = {
+      delete: "/v1/uoms/{uom_code}"
+    };
+  }
+}
+
+// UOM represents a Unit of Measure entity
+message UOM {
+  string uom_code = 1;
+  string uom_name = 2;
+  UOMCategory uom_category = 3;
+  bool is_base_uom = 4;
+  AuditInfo audit = 5;
+}
+
+// UOMCategory represents the type/category of UOM
+enum UOMCategory {
+  UOM_CATEGORY_UNSPECIFIED = 0;
+  UOM_CATEGORY_WEIGHT = 1;    // KG, G, TON
+  UOM_CATEGORY_VOLUME = 2;    // L, ML, M3
+  UOM_CATEGORY_QUANTITY = 3;  // PCS, BOX, ROLL
+  UOM_CATEGORY_LENGTH = 4;    // M, CM, MM
+}
+
+// CreateUOM
+message CreateUOMRequest {
+  string uom_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 20,
+    pattern: "^[A-Z][A-Z0-9_]*$"
+  }];
+  
+  string uom_name = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  
+  UOMCategory uom_category = 3 [(buf.validate.field).enum = {
+    defined_only: true,
+    not_in: [0]
+  }];
+  
+  bool is_base_uom = 4;
+}
+
+message CreateUOMResponse {
+  BaseResponse base = 1;
+  UOM data = 2;
+}
+
+// GetUOM
+message GetUOMRequest {
+  string uom_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 20
+  }];
+}
+
+message GetUOMResponse {
+  BaseResponse base = 1;
+  UOM data = 2;
+}
+
+// ListUOMs
+message ListUOMsRequest {
+  int32 page = 1 [(buf.validate.field).int32 = {gte: 1}];
+  int32 page_size = 2 [(buf.validate.field).int32 = {gte: 1, lte: 100}];
+  optional UOMCategory category = 3;
+}
+
+message ListUOMsResponse {
+  BaseResponse base = 1;
+  repeated UOM data = 2;
+  PaginationMeta pagination = 3;
+}
+
+// UpdateUOM
+message UpdateUOMRequest {
+  string uom_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 20
+  }];
+  
+  string uom_name = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  
+  UOMCategory uom_category = 3 [(buf.validate.field).enum = {
+    defined_only: true,
+    not_in: [0]
+  }];
+  
+  bool is_base_uom = 4;
+}
+
+message UpdateUOMResponse {
+  BaseResponse base = 1;
+  UOM data = 2;
+}
+
+// DeleteUOM
+message DeleteUOMRequest {
+  string uom_code = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 20
+  }];
+}
+
+message DeleteUOMResponse {
+  BaseResponse base = 1;
+}

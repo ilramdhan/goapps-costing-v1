@@ -1,0 +1,70 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+build/
+
+# Go
+*.test
+*.out
+go.work
+go.work.sum
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.env
+
+# Config (keep sample, ignore actual)
+config.local.yaml
+config.production.yaml
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (ignore planning docs)
+Docs1/
+Docs2/
+Docs3/
+Docs4/
+Docs5/
+PRD_YARN_COSTING_SYSTEM.md
+
+# Generated files (keep proto, ignore generated)
+# gen/ - We keep generated code in version control for now
+
+# Build artifacts
+tmp/
+*.tmp
+
+# Database
+*.db
+*.sqlite
+
+# Coverage
+coverage.out
+coverage.html
+*.coverprofile
+
+# Air (live reload)
+tmp/
+
+# Buf
+.buf/

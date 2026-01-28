@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package costing.v1;
+
+option go_package = "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1;costingv1";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+// HealthService provides health check endpoints for Kubernetes probes
+service HealthService {
+  // Liveness check - is the service alive and running?
+  rpc Liveness(LivenessRequest) returns (LivenessResponse) {
+    option (google.api.http) = {
+      get: "/health/live"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Health"
+      summary: "Liveness Check"
+      description: "Check if the service is alive and running"
+    };
+  }
+
+  // Readiness check - is the service ready to receive traffic?
+  rpc Readiness(ReadinessRequest) returns (ReadinessResponse) {
+    option (google.api.http) = {
+      get: "/health/ready"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Health"
+      summary: "Readiness Check"
+      description: "Check if the service is ready to receive traffic"
+    };
+  }
+}
+
+message LivenessRequest {}
+
+message LivenessResponse {
+  string status = 1; // "OK" or "FAIL"
+}
+
+message ReadinessRequest {}
+
+message ReadinessResponse {
+  string status = 1; // "READY" or "NOT_READY"
+  map<string, ComponentHealth> components = 2;
+}
+
+message ComponentHealth {
+  string status = 1;  // "UP" or "DOWN"
+  string message = 2; // Error message if DOWN
+}
