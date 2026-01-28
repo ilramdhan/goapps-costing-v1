@@ -5,18 +5,24 @@ import (
 
 	pb "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1"
 	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/postgres"
+	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/redis"
 )
 
 // HealthHandler implements the gRPC HealthService
 type HealthHandler struct {
 	pb.UnimplementedHealthServiceServer
-	db *postgres.DB
-	// redis *redis.Client // Add when Redis is implemented
+	db    *postgres.DB
+	redis *redis.Client
 }
 
-// NewHealthHandler creates a new health handler
+// NewHealthHandler creates a new health handler (PostgreSQL only)
 func NewHealthHandler(db *postgres.DB) *HealthHandler {
 	return &HealthHandler{db: db}
+}
+
+// NewHealthHandlerWithRedis creates a new health handler with Redis support
+func NewHealthHandlerWithRedis(db *postgres.DB, redis *redis.Client) *HealthHandler {
+	return &HealthHandler{db: db, redis: redis}
 }
 
 // Liveness check - is the service alive and running?
@@ -40,6 +46,21 @@ func (h *HealthHandler) Readiness(ctx context.Context, req *pb.ReadinessRequest)
 		components["postgres"] = &pb.ComponentHealth{
 			Status:  "UP",
 			Message: "",
+		}
+	}
+
+	// Check Redis (optional)
+	if h.redis != nil {
+		if err := h.redis.HealthCheck(ctx); err != nil {
+			components["redis"] = &pb.ComponentHealth{
+				Status:  "DOWN",
+				Message: err.Error(),
+			}
+		} else {
+			components["redis"] = &pb.ComponentHealth{
+				Status:  "UP",
+				Message: "",
+			}
 		}
 	}
 

@@ -20,11 +20,13 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	pb "github.com/homindolenern/goapps-costing-v1/gen/go/costing/v1"
+	appparam "github.com/homindolenern/goapps-costing-v1/internal/application/parameter"
 	appuom "github.com/homindolenern/goapps-costing-v1/internal/application/uom"
 	"github.com/homindolenern/goapps-costing-v1/internal/config"
 	grpcdelivery "github.com/homindolenern/goapps-costing-v1/internal/delivery/grpc"
 	"github.com/homindolenern/goapps-costing-v1/internal/delivery/grpc/interceptors"
 	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/postgres"
+	"github.com/homindolenern/goapps-costing-v1/internal/infrastructure/redis"
 )
 
 func main() {
@@ -60,25 +62,49 @@ func run(cfg *config.Config) error {
 	}
 	defer db.Close()
 
+	// Initialize Redis (optional - continue without it)
+	redisClient, err := redis.NewClient(cfg.Redis)
+	if err != nil {
+		log.Warn().Err(err).Msg("Redis connection failed - caching disabled")
+		redisClient = nil
+	} else {
+		defer redisClient.Close()
+	}
+
 	// Initialize repositories
 	uomRepo := postgres.NewUOMRepository(db)
+	paramRepo := postgres.NewParameterRepository(db)
 
-	// Initialize application handlers
-	createHandler := appuom.NewCreateHandler(uomRepo)
-	updateHandler := appuom.NewUpdateHandler(uomRepo)
-	deleteHandler := appuom.NewDeleteHandler(uomRepo)
-	getHandler := appuom.NewGetHandler(uomRepo)
-	listHandler := appuom.NewListHandler(uomRepo)
+	// Initialize UOM application handlers
+	uomCreateHandler := appuom.NewCreateHandler(uomRepo)
+	uomUpdateHandler := appuom.NewUpdateHandler(uomRepo)
+	uomDeleteHandler := appuom.NewDeleteHandler(uomRepo)
+	uomGetHandler := appuom.NewGetHandler(uomRepo)
+	uomListHandler := appuom.NewListHandler(uomRepo)
+
+	// Initialize Parameter application handlers
+	paramCreateHandler := appparam.NewCreateHandler(paramRepo)
+	paramUpdateHandler := appparam.NewUpdateHandler(paramRepo)
+	paramDeleteHandler := appparam.NewDeleteHandler(paramRepo)
+	paramGetHandler := appparam.NewGetHandler(paramRepo)
+	paramListHandler := appparam.NewListHandler(paramRepo)
 
 	// Initialize gRPC handlers
 	uomHandler := grpcdelivery.NewUOMHandler(
-		createHandler,
-		updateHandler,
-		deleteHandler,
-		getHandler,
-		listHandler,
+		uomCreateHandler,
+		uomUpdateHandler,
+		uomDeleteHandler,
+		uomGetHandler,
+		uomListHandler,
 	)
-	healthHandler := grpcdelivery.NewHealthHandler(db)
+	paramHandler := grpcdelivery.NewParameterHandler(
+		paramCreateHandler,
+		paramUpdateHandler,
+		paramDeleteHandler,
+		paramGetHandler,
+		paramListHandler,
+	)
+	healthHandler := grpcdelivery.NewHealthHandlerWithRedis(db, redisClient)
 
 	// Handle graceful shutdown
 	sigChan := make(chan os.Signal, 1)
@@ -88,7 +114,7 @@ func run(cfg *config.Config) error {
 
 	// Start gRPC server
 	g.Go(func() error {
-		return runGRPCServer(ctx, cfg, uomHandler, healthHandler)
+		return runGRPCServer(ctx, cfg, uomHandler, paramHandler, healthHandler)
 	})
 
 	// Start HTTP gateway server
@@ -114,6 +140,7 @@ func runGRPCServer(
 	ctx context.Context,
 	cfg *config.Config,
 	uomHandler *grpcdelivery.UOMHandler,
+	paramHandler *grpcdelivery.ParameterHandler,
 	healthHandler *grpcdelivery.HealthHandler,
 ) error {
 	addr := fmt.Sprintf(":%d", cfg.Server.GRPCPort)
@@ -142,6 +169,7 @@ func runGRPCServer(
 
 	// Register service implementations
 	pb.RegisterUOMServiceServer(grpcServer, uomHandler)
+	pb.RegisterParameterServiceServer(grpcServer, paramHandler)
 	pb.RegisterHealthServiceServer(grpcServer, healthHandler)
 
 	log.Info().Str("addr", addr).Msg("gRPC server starting")
@@ -170,6 +198,9 @@ func runHTTPServer(ctx context.Context, cfg *config.Config) error {
 	// Register gateway handlers
 	if err := pb.RegisterUOMServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts); err != nil {
 		return fmt.Errorf("failed to register UOM gateway: %w", err)
+	}
+	if err := pb.RegisterParameterServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts); err != nil {
+		return fmt.Errorf("failed to register Parameter gateway: %w", err)
 	}
 	if err := pb.RegisterHealthServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts); err != nil {
 		return fmt.Errorf("failed to register Health gateway: %w", err)
